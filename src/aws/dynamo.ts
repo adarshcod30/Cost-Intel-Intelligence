@@ -117,7 +117,7 @@ export async function getAllRuns() {
   const result = await docClient.send(new ScanCommand({
     TableName:        AUDIT_TABLE,
     FilterExpression: '#e = :e',
-    ExpressionAttributeNames:  { '#e': 'event' },
+    ExpressionAttributeNames:  { '#e': 'event', '#ts': 'timestamp' },
     ExpressionAttributeValues: { ':e': 'run_started' },
     ProjectionExpression: 'run_id, #ts',
     // Note: need alias for timestamp too since it might be reserved
