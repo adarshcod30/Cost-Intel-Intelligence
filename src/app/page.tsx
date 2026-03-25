@@ -64,7 +64,7 @@ export default function Home() {
       }
     }, 2500);
 
-    fetch("/api/simulate", { method: 'POST' })
+    fetch("/api/pipeline", { method: 'POST' })
       .then(res => res.json())
       .then(data => {
         clearInterval(interval);
@@ -319,9 +319,9 @@ export default function Home() {
     );
   }
 
-  const impact = apiData?.total_impact_inr || 19181304;
-  const leakage = (apiData?.estimated_leakage_inr || 23829982);
-  const penalty = (apiData?.penalty_at_risk_inr || 4775000);
+  const impact = apiData?.total_money_saved || 19181304;
+  const leakage = (apiData?.cost_leakage_inr || 23829982);
+  const penalty = (apiData?.sla_penalty_inr || 4775000);
 
   return (
     <div className="flex flex-col min-h-screen bg-[#020617] text-slate-50">
@@ -346,8 +346,8 @@ export default function Home() {
           {[
             { label: "Total Money Saved", val: (impact/100000).toFixed(2), unit: "L", icon: CheckCircle, color: "text-green-500", meta: "+14% vs last quarter" },
             { label: "Cost Leakage Prevented", val: (leakage/100000).toFixed(2), unit: "L", icon: Search, color: "text-blue-400", meta: `From ${apiData?.anomaly_count || 43} anomalies` },
-            { label: "SLA Penalty Avoided", val: (penalty/100000).toFixed(2), unit: "L", icon: AlertTriangle, color: "text-amber-500", meta: `From ${apiData?.sla_risk_count || 118} risks` },
-            { label: "Autonomous Actions", val: apiData?.total_actions || 20, unit: "", icon: Zap, color: "text-primary", meta: "Active AI execution" },
+            { label: "SLA Penalty Avoided", val: (penalty/100000).toFixed(2), unit: "L", icon: AlertTriangle, color: "text-amber-500", meta: `From ${apiData?.breach_count || 118} risks` },
+            { label: "Autonomous Actions", val: apiData?.autonomous_actions || 20, unit: "", icon: Zap, color: "text-primary", meta: "Active AI execution" },
           ].map((kpi, idx) => {
             const Icon = kpi.icon;
             return (
