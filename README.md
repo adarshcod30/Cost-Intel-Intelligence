@@ -119,50 +119,59 @@ Cost Intel Intelligence follows a clean separation between the **presentation la
 
 ```mermaid
 graph TD
-    subgraph UI["Next.js 14 Dashboard"]
-        O[Overview]
-        A[AI Actions]
-        An[Anomalies]
-        I[Impact]
-        AT[Audit Trail]
-        SL[Simulation Lab]
+    %% Styling Rules
+    classDef ui fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#f8fafc
+    classDef agent fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#eff6ff
+    classDef aws fill:#374151,stroke:#f59e0b,stroke-width:2px,color:#fcfdff
+    classDef db fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5
+    classDef highlight fill:#be185d,stroke:#f43f5e,stroke-width:3px,color:#fff
+    
+    subgraph Frontend["🖥️ Next.js 14 Dashboard Components"]
+        Dash[Executive Overview]
+        Sim[Simulation Lab]
+        Act[AI Action Queue]
+        Anom[Risk & Anomalies]
+        SLA[Impact Metrics]
+        Aud[Immutable Audit Trail]
     end
 
-    subgraph Pipeline["LangGraph.js Pipeline"]
-        N1((1. Ingest)) --> N2((2. Anomaly))
-        N2 --> N3((3. SLA))
-        N3 --> N4((4. Root Cause))
-        N4 --> N5((5. Decision))
-        N5 --> N6((6. Action))
-        N6 --> N7((7. Audit))
+    subgraph AWS_Infra["☁️ AWS Serverless Infrastructure"]
+        DB[(DynamoDB Data Lake)]
+        Lambda[AWS Lambda Compute]
+        Bedrock[Amazon Bedrock LLM]
     end
 
-    subgraph AWS["AWS Serverless Infrastructure"]
-        DDB[(DynamoDB)]
-        BR[Amazon Bedrock<br/>Nova Pro / Mistral]
-        EB{EventBridge<br/>Cron}
-        L[Lambda<br/>Functions]
+    subgraph Pipeline["🧠 LangGraph.js 7-Agent Stateful Pipeline"]
+        A1(1. Ingest Agent) --> A2(2. Anomaly Agent)
+        A2 --> A3(3. SLA Predictor)
+        A3 --> A4(4. Root Cause)
+        A4 --> A5{5. Decision Maker}
+        A5 -->|P1/P2: HITL Review| A6(6. Action Router)
+        A5 -->|P3: Auto-Execute| A6
+        A6 --> A7(7. Audit Logger)
     end
     
-    UI <-->|API Routes| Pipeline
-    Pipeline <--> ID[reads/writes]
-    ID --> AWS
-    
-    EB -->|Triggers| L
-    L -->|Injects Data| DDB
-    
-    classDef default fill:#1E293B,stroke:#3B82F6,stroke-width:2px,color:#fff
-    classDef highlight fill:#3B82F6,stroke:#2563EB,stroke-width:2px,color:#fff
-    classDef storage fill:#0F172A,stroke:#10B981,stroke-width:2px,color:#fff
-    class DDB storage
-    class N5 highlight
+    %% Connections
+    Frontend <==>|tRPC / API Routes| Pipeline
+    Pipeline ===>|Event Triggers| Lambda
+    Lambda ===>|Read/Write Streams| DB
+    A5 ===>|Converse API| Bedrock
+    A7 ===>|Structured Logs| DB
+
+    %% Assignments
+    class Dash,Sim,Act,Anom,SLA,Aud ui
+    class A1,A2,A3,A4,A6,A7 agent
+    class A5 highlight
+    class DB db
+    class Lambda,Bedrock aws
 ```
+
 
 ---
 
 ## The 7-Agent Pipeline — Deep Dive
 
-Each agent in the Cost Intel Intelligence pipeline is a pure function that updates a shared LangGraph state block. 
+Each agent in the Cost Intel Intelligence pipeline is a pure function that updates a shared LangGraph state block. By breaking down the analysis process into 7 distinct cognitive steps, the system achieves perfect determinism: if the LLM makes a mistake, the exact input and reasoning state is captured in the isolated node block for review.
 
 | Agent | Responsibility | Input | Output | Failure Mode |
 |---|---|---|---|---|
@@ -176,34 +185,61 @@ Each agent in the Cost Intel Intelligence pipeline is a pure function that updat
 
 ### LangGraph State Machine Flow
 
+> 📸 **Trace Telemetry:** Expanding the JSON payload of a single autonomous node transition.
+> ![Audit Trace Payload](docs/screenshots/audit_trace_detail.png)
+
 ```mermaid
-graph TD
-    Start((Start)) --> I[Ingest]
-    I -- Error --> FI[Fallback Ingest]
-    FI --> A[Anomaly]
-    I --> A
-    A --> S[SLA]
-    S --> RC[Root Cause]
-    RC --> D[Decision]
-    D -- LLM Error --> MF[Mistral Fallback]
-    MF --> AC[Action]
-    D --> AC
+flowchart TB
+    %% Definitions
+    classDef startEnd fill:#000,stroke:#333,stroke-width:4px,color:#fff
+    classDef agent fill:#1d4ed8,stroke:#93c5fd,stroke-width:2px,color:#fff,rx:10,ry:10
+    classDef llm fill:#b45309,stroke:#fde68a,stroke-width:2px,color:#fff,rx:5,ry:5
+    classDef action fill:#047857,stroke:#a7f3d0,stroke-width:2px,color:#fff
+    classDef human fill:#be185d,stroke:#fbcfe8,stroke-width:2px,color:#fff
     
-    AC -- P3 Actions --> Auto[Auto-Execute]
-    AC -- P1/P2 Actions --> HITL[Human-in-the-Loop]
-    HITL --> Poll[Poll DynamoDB]
-    Poll --> Exec[Execute on Approval]
+    Start((Trigger)) --> Ingest
     
-    Auto --> AU[Audit]
-    Exec --> AU
-    AU --> End((End))
+    subgraph Data Processing
+        Ingest[🔍 1. Ingest Agent<br/><small>Reads 30m rolling window</small>]
+        Anomaly[🧮 2. Anomaly Agent<br/><small>Isolation algorithms</small>]
+        SLA[⏳ 3. SLA Agent<br/><small>Statistical breach prediction</small>]
+        RC[🧠 4. Root Cause Agent<br/><small>Groups & contextualizes</small>]
+        
+        Ingest ==> Anomaly ==> SLA ==> RC
+    end
     
-    classDef agent fill:#3B82F6,stroke:#2563EB,stroke-width:2px,color:#fff
-    classDef fallback fill:#EF4444,stroke:#DC2626,stroke-width:2px,color:#fff
-    classDef human fill:#F59E0B,stroke:#D97706,stroke-width:2px,color:#fff
+    subgraph Cognitive Layer
+        Decide{⚖️ 5. Decision Agent<br/><small>Synthesizes Action Plan</small>}
+        Nova[Amazon Nova Pro<br/><small>Primary Logic Engine</small>]
+        Mistral[Mistral Large<br/><small>Failover Logic Engine</small>]
+        
+        RC ==> Decide
+        Decide -.->|Primary Call| Nova
+        Decide -.->|Fallback Call| Mistral
+    end
     
-    class I,A,S,RC,D,AC,AU agent
-    class FI,MF fallback
+    subgraph Execution & Routing
+        Route[🚦 6. Action Agent<br/><small>Priority Router</small>]
+        Auto((⚙️ Auto-Execute<br/>Priority 3))
+        HITL((👤 Human-in-Loop<br/>Priority 1 & 2))
+        
+        Decide ==> Route
+        Route -->|Low Risk Mitigation| Auto
+        Route -->|High Risk Strategic| HITL
+    end
+    
+    subgraph Security & Compliance
+        Audit[🔐 7. Audit Agent<br/><small>Immutable ledger write</small>]
+        Auto ==> Audit
+        HITL ==> Audit
+    end
+    
+    Audit --> Finish((End))
+    
+    class Start,Finish startEnd
+    class Ingest,Anomaly,SLA,RC,Decide,Route,Audit agent
+    class Nova,Mistral llm
+    class Auto action
     class HITL human
 ```
 
@@ -356,17 +392,39 @@ The `Bedrock Converse API` is utilized natively for Nova Pro to take advantage o
 
 ---
 
-## The Prototype vs. Full Production System
+## 🔮 The Full-Scale Production Vision: Where This Is Going
 
-| Dimension | Hackathon Prototype | Full Production System |
-|---|---|---|
-| **Data Source** | Simulator Engine (6 distinct scenarios) | SAP / Oracle ERP webhooks & batch streams |
-| **Ticket Source** | Synthesized statistical service tickets | ServiceNow / Jira dynamic API ingestion |
-| **Detection** | Isolation-inspired heuristic scoring algorithms | Fine-tuned Isolation Forest + XGBoost ensembles |
-| **Reasoning** | Unified AWS Bedrock foundation | Same + Private domain-adapted LLM checkpoints |
-| **Approval Interops** | Built-in React HITL dashboard | Slack / Microsoft Teams contextual actionable messaging |
-| **Audit Trails** | Append-based DynamoDB runs table | SOC-2 compliant cryptographically signed ledgers |
-| **Integrations** | Internal simulation of blocks & controls | Active ERP intervention (SAP AP Hold / Block triggers) |
+While the current Cost Intel Intelligence platform serves as a high-fidelity prototype using synthesized data streams, the architecture was explicitly built to seamlessly transition into a **live, multi-cloud enterprise operational environment**. 
+
+Here is exactly how the system maps from its current state to a fully-scaled enterprise deployment:
+
+### 1. Data Ingestion: From Simulation to Live ERP Polling
+* **Current:** A synthetic engine generates stochastic financial anomalies and SLA capacity crunches.
+* **Production Scale:** The `Ingest Agent` will connect directly to enterprise systems of record.
+  * **Finance Data:** Direct REST/SOAP API integration with **SAP S/4HANA**, **Oracle NetSuite**, or **Coupa** to ingest purchase orders, invoice receipts, and vendor contracts in real time.
+  * **Operations Data:** Webhooks securely tied to **ServiceNow**, **Jira Service Management**, or **Zendesk** to monitor ticket SLA lifecycles and human agent capacities.
+  * **Data Lake Infrastructure:** All raw operational telemetry will route through an Amazon Kinesis Data Stream into a central S3 Data Lake before hitting the LangGraph pipeline.
+
+### 2. Threat Detection: From Heuristics to Deep Learning
+
+> 📸 **Risk Assessment UI:** Identifying Off-Contract and Duplicate leakage events in real-time.
+> ![Risk Assessment Matrix](docs/screenshots/risk_matrix_v2.png)
+
+* **Current:** We utilize an optimized Isolation Forest-inspired statistical standard deviation matrix.
+* **Production Scale:** 
+  * Enterprise anomalies operate in high dimensions. We will deploy clustered **XGBoost ensembles** and **Autoencoders** continuously trained via AWS SageMaker on the corporation's historical spend data.
+  * The production models will dynamically track complex patterns: multi-year vendor price-creep, shadow IT unapproved software subscriptions, and fractional duplicate billing spanning across multiple business units and geographic currencies.
+
+### 3. Execution & Corrective Action: Seamless Enterprise Intervention
+* **Current:** Actions are routed to a simulated execution queue on the Dashboard Actions Page.
+* **Production Scale:** The `Action Agent` gains secure Write-access via highly restricted IAM roles to intervene *before* cash leaves the business.
+  * **Automated Intervention (P3):** Instantly hits the SAP API to place a "Payment Hold" flag on a confirmed duplicate invoice before the nightly treasury payment run clears.
+  * **Human Approvals (P1/P2):** Integrates directly into workflows via **Slack** or **Microsoft Teams**. The CFO receives an interactive Slack card showing the anomaly, the Amazon Nova Pro structural reasoning, and a one-click `[Approve Hold]` or `[Override]` button. 
+
+### 4. Security, Compliance, & Infrastructure Scaling
+* **Role-Based Access Control (RBAC):** Implementation of strict JWT/OAuth2 flows via AWS Cognito. Vendor management teams can only review P2 actions strictly related to their specific vendor portfolio.
+* **SOC-2 Immutable Ledgers:** The current DynamoDB audit log will be fortified using **Amazon QLDB (Quantum Ledger Database)**, ensuring that every LLM decision is cryptographically signed, tamper-proof, and instantly verifiable by external financial auditors.
+* **Multi-AZ Kubernetes Scaling:** The Next.js dashboard and LangGraph pipelines will be containerized via Docker and orchestrated on Amazon EKS (Elastic Kubernetes Service), allowing the system to auto-scale from 100 invoices/day to 10,000,000 invoices/day seamlessly during corporate month-end financial closes.
 
 ---
 
