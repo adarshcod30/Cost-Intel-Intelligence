@@ -6,7 +6,7 @@ import {
 } from '@aws-sdk/client-bedrock-runtime'
 
 const client = new BedrockRuntimeClient({
-  region: process.env.AWS_REGION || 'ap-south-1',
+  region: process.env.REGION || 'us-east-1',
   // In production (Amplify), the SDK will automatically pick up IAM role credentials
   // if these environment variables are not explicitly provided.
   ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
