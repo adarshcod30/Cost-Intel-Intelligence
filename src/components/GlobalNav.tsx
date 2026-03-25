@@ -44,7 +44,7 @@ export function GlobalNav() {
               <Zap className="h-6 w-6 text-blue-400 fill-blue-400/20" />
             </div>
             <div className="flex flex-col justify-center">
-              <span className="leading-none whitespace-nowrap bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text font-black text-3xl">CostIntel</span>
+              <span className="leading-none whitespace-nowrap bg-gradient-to-r from-blue-400 to-purple-400 text-transparent bg-clip-text font-black text-3xl">Cost Intel Intelligence</span>
               <span className="text-[10px] uppercase tracking-[0.2em] text-blue-300 font-bold mt-0.5 hidden sm:block whitespace-nowrap">
                 AI Orchestration
               </span>

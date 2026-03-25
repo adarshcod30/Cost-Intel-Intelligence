@@ -10,8 +10,6 @@
   [![LangGraph.js](https://img.shields.io/badge/LangGraph.js-Orchestration-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraphjs/)
   [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-  <br />
-  <b>ET GenAI Hackathon 2026 — Problem Statement 3</b>
 </div>
 
 <br />
@@ -19,9 +17,7 @@
 > 📸 **Dashboard Overview:** Executive Summary with live metrics.
 > ![Dashboard Overview](docs/screenshots/overview.png)
 
----
-
-## 📑 Table of Contents
+## Table of Contents
 
 - [The Problem — Why This Exists](#the-problem--why-this-exists)
 - [What CostIntel Does — Solution Overview](#what-costintel-does--solution-overview)
@@ -46,7 +42,7 @@
 
 ---
 
-## 🚨 The Problem — Why This Exists
+## The Problem — Why This Exists
 
 Imagine you are the CFO of an Indian enterprise processing `₹500 Crore` in annual procurement spend. Your finance team reviews invoices manually — thousands of them every month. They check for duplicate charges, compare vendor billing against contract rates, and flag anything suspicious. On a good day, they catch about 60% of the anomalies. But here is the problem: **by the time a human analyst spots a duplicate payment or an off-contract charge, the money has already left your account — typically 2 to 4 weeks ago.** 
 
@@ -60,9 +56,9 @@ Additionally, SLA breaches carry automatic penalty clauses — typically `₹25,
 
 ---
 
-## 💡 What CostIntel Does — Solution Overview
+## What Cost Intel Intelligence Does — Solution Overview
 
-CostIntel is an autonomous AI agent system. It is not just a dashboard showing charts; it is an active participant in your enterprise finance operations that detects problems, reasons about causes, takes corrective action, and writes a complete audit trail in under **3 seconds** per execution cycle.
+Cost Intel Intelligence is an autonomous AI agent system. It is not just a dashboard showing charts; it is an active participant in your enterprise finance operations that detects problems, reasons about causes, takes corrective action, and writes a complete audit trail in under **3 seconds** per execution cycle.
 
 1. **Ingests Data:** Continuously reads procurement invoices and SLA tickets from a DynamoDB stream (mocking a live ERP feed like SAP or Oracle).
 2. **Detects Anomalies:** Scans 100% of transactions through a statistical isolation algorithm to identify pricing outliers, duplicates, and off-contract billing.
@@ -77,10 +73,10 @@ CostIntel is an autonomous AI agent system. It is not just a dashboard showing c
 
 ---
 
-## ⭐ Key Features — Full Feature List
+## Key Features — Full Feature List
 
 ### 1. 7-Agent LangGraph.js Pipeline
-The core of CostIntel is a stateful multi-agent pipeline: `Ingest → Anomaly → SLA → RootCause → Decision → Action → Audit`. Each agent has a single, testable responsibility. LangGraph.js manages a persistent, typed state object that flows through every node, giving the final Audit agent full visibility into what every upstream agent decided and why.
+The core of Cost Intel Intelligence is a stateful multi-agent pipeline: `Ingest → Anomaly → SLA → RootCause → Decision → Action → Audit`. Each agent has a single, testable responsibility. LangGraph.js manages a persistent, typed state object that flows through every node, giving the final Audit agent full visibility into what every upstream agent decided and why.
 
 ### 2. Dynamic Simulation Engine
 Ships with 6 named enterprise scenarios (`normal`, `vendor_spike`, `sla_crisis`, `audit_crunch`, `post_merger`, `festive_rush`). Scenarios control anomaly rates, spike multipliers, and team capacity. The simulator uses zero fixed seeds and has a 20% burst event probability — mimicking real-world clusters of anomalies like compromised vendor accounts. 
@@ -117,9 +113,9 @@ Fully serverless AWS stack running in `ap-south-1` (Mumbai) for low latency. Use
 
 ---
 
-## 🏗️ Architecture — Full System Architecture
+## Architecture — Full System Architecture
 
-CostIntel follows a clean separation between the **presentation layer** (Next.js 14 Dashboard), the **intelligence layer** (LangGraph.js Pipeline + Bedrock), and the **persistence layer** (DynamoDB).
+Cost Intel Intelligence follows a clean separation between the **presentation layer** (Next.js 14 Dashboard), the **intelligence layer** (LangGraph.js Pipeline + Bedrock), and the **persistence layer** (DynamoDB).
 
 ```mermaid
 graph TD
@@ -164,9 +160,9 @@ graph TD
 
 ---
 
-## 🤖 The 7-Agent Pipeline — Deep Dive
+## The 7-Agent Pipeline — Deep Dive
 
-Each agent is a pure function that updates a shared LangGraph state block. 
+Each agent in the Cost Intel Intelligence pipeline is a pure function that updates a shared LangGraph state block. 
 
 | Agent | Responsibility | Input | Output | Failure Mode |
 |---|---|---|---|---|
@@ -213,7 +209,7 @@ graph TD
 
 ---
 
-## 🌊 Data Flow Diagram (DFD)
+## Data Flow Diagram (DFD)
 
 ```mermaid
 flowchart LR
@@ -259,7 +255,7 @@ flowchart LR
 
 ---
 
-## 🛠️ Tech Stack — Full Table
+## Tech Stack — Full Table
 
 | Layer | Technology | Version | Why This Choice |
 |---|---|---|---|
@@ -278,7 +274,7 @@ flowchart LR
 
 ---
 
-## 📁 Project File Structure
+## Project File Structure
 
 ```text
 Cost-Intel-Intelligence/
@@ -292,6 +288,12 @@ Cost-Intel-Intelligence/
 │   │   ├── sla/page.tsx              # /sla — Impact / Working Capital page
 │   │   ├── audit/page.tsx            # /audit — Technical trace logging
 │   │   └── api/                      # Next.js specific serverless API routes
+│   │       ├── pipeline/route.ts     # Triggers AI simulation + LangGraph agents
+│   │       ├── approve/route.ts      # HITL approval mechanics
+│   │       ├── runs/route.ts         # Pipeline execution history
+│   │       ├── metrics/[id]/route.ts # Mathematical KPIs
+│   │       ├── audit/[id]/route.ts   # Deep trace retrieval
+│   │       └── status/route.ts       # Live system polling
 │   │
 │   ├── components/                   # React UI presentational components
 │   │   └── GlobalNav.tsx             # Navbar with gradient branding
@@ -308,18 +310,23 @@ Cost-Intel-Intelligence/
 │   │   ├── config.ts                 # Resource configurations
 │   │   ├── dynamo.ts                 # Database wrappers
 │   │   ├── bedrock.ts                # Dual-model LLM abstraction
-│   │   └── deploy/create_tables.ts   # Infrastructure provisioning script
+│   │   └── deploy/
+│   │       └── create_tables.ts      # Instantiates DynamoDB tables
 │   │
 │   └── lib/                          # App utilities
 │       └── formatINR.ts              # Financial presentation logic
 │
 ├── docs/screenshots/                 # README demonstration imagery
-└── package.json / .env.example       # Modules and Environment dependencies
+├── .env.example                      # Environment variables template
+├── next.config.js                    # Next.js routing and build config
+├── package.json                      # NPM dependencies and scripts
+├── tailwind.config.js                # Tailwind CSS styling and theme
+└── tsconfig.json                     # TypeScript compiler configuration
 ```
 
 ---
 
-## 🎭 Simulation Scenarios
+## Simulation Scenarios
 
 The active scenario is chosen purely dynamically per run to stress-test the pipeline under different enterprise stressors. 
 
@@ -337,7 +344,7 @@ The active scenario is chosen purely dynamically per run to stress-test the pipe
 
 ---
 
-## ☁️ AWS Infrastructure
+## AWS Infrastructure
 
 ### DynamoDB Tables
 1. `costintel-live-stream` — **TTL: 24h**. Rolling window of simulated ERP invoices and tickets.
@@ -349,7 +356,7 @@ The `Bedrock Converse API` is utilized natively for Nova Pro to take advantage o
 
 ---
 
-## 🔮 The Prototype vs. Full Production System
+## The Prototype vs. Full Production System
 
 | Dimension | Hackathon Prototype | Full Production System |
 |---|---|---|
@@ -363,7 +370,7 @@ The `Bedrock Converse API` is utilized natively for Nova Pro to take advantage o
 
 ---
 
-## 💰 The Financial Impact Model
+## The Financial Impact Model
 
 We model our impact projection using conservative figures tied to a fictional but completely standard mid-cap Indian corporation.
 
@@ -381,7 +388,7 @@ Assumption 2: CostIntel Recovery Rate
 Assumption 3: SLA Penalty Protections
   1,000 tickets/month × 8% breach probability × ₹50,000 avg penalty
   = ₹40 Lakh/month = ₹4.8 Cr/year penalty risk
-  CostIntel proactive intervention at 70% success = ₹3.36 Crore savings
+  Cost Intel Intelligence proactive intervention at 70% success = ₹3.36 Crore savings
 
 TOTAL ANNUAL ENTERPRISE VALUE DELIVERED: ₹24.61 Crore Return
 ================================================================
@@ -392,7 +399,7 @@ TOTAL ANNUAL ENTERPRISE VALUE DELIVERED: ₹24.61 Crore Return
 
 ---
 
-## 🚀 Setup & Installation
+## Setup & Installation
 
 **Prerequisites:** Node.js 20.x, an AWS Account (Bedrock Models enabled in `ap-south-1`).
 
@@ -421,7 +428,7 @@ npm run dev
 
 ---
 
-## 🔐 Environment Variables Reference
+## Environment Variables Reference
 
 | Variable | Requirement | Description |
 |---|---|---|
@@ -434,7 +441,7 @@ npm run dev
 
 ---
 
-## 📖 Dashboards & APIs
+## Dashboards & APIs
 
 ### Key Page Routes
 - `/`: The cinematic narrative overview.
@@ -458,7 +465,7 @@ npm run dev
 
 ---
 
-## 🧪 How to Add a New Scenario
+## How to Add a New Scenario
 
 Extend testing coverage via the simulation engine effortlessly:
 
@@ -479,19 +486,7 @@ The architecture natively folds this context into detection baselines without ad
 
 ---
 
-## 🏆 Judging Criteria Alignment
-
-| Area | Fulfillment within CostIntel |
-|---|---|
-| **Innovation & Creativity** | The orchestration of 7 independent agents, linked strictly through LangGraph states bridging disparate systems (Finance + Operational Support), brings unseen alignment. |
-| **Technical Implementation** | Utilizes stateful Next.js backend mechanics, Dual-Fallback LLM logic on Bedrock, fully serverless unmetered Dynamo infrastructure, and high-framerate dynamic DOM modeling via React concurrently. |
-| **Feasibility & Scalability** | PAY_PER_REQUEST on NoSQL architectures ensures literal infinite cost efficiency on scale logic, easily bridging directly into live ERP REST webhooks tomorrow via typical Enterprise-grade IAM. |
-| **Relevance to Problem Statement** | Addresses PS3 flawlessly: "continuously monitor enterprise operations data, identify cost leakage, and initiate corrective actions with quantifiable financial impact." |
-| **Documentation & Quality** | A meticulously clean Next.js 14 App Router codebase stripped of monolithic bloat, paired to exhaustive diagrams, visual demonstrations, clear assumptions mapping, and an exact testing methodology. |
-
----
-
-## 🤝 Contributing & License
+## Contributing & License
 
 We love to collaborate on extending this framework further. Contributions standard via fork & pull request branches alongside accompanying testing.
 
@@ -500,14 +495,17 @@ This software is provided "AS IS", completely open-sourced to encourage iterativ
 
 ---
 
-## 🙌 Acknowledgements
+## Acknowledgements
 
-* **ET GenAI Hackathon 2026** & **Unstop** for driving technological progress contextually.
-* **Avataar.ai** for curating real-world operational scenarios as hiring challenges.
+* **Developed by Adarsh Dwivedi**
+  * 📱 +91 9305597756
+  * 💻 [GitHub Profile](https://github.com/adarshcod30)
+  * 🔗 [LinkedIn Profile](https://www.linkedin.com/in/adarshdwivedi30)
+  * *Adarsh is a passionate software engineer specializing in AI-driven enterprise applications and full-stack development. By integrating sophisticated large language models with reliable backend architectures, he focuses on building scalable autonomous systems that solve real-world problems.*
 * **AWS Bedrock** for unlocking advanced programmatic reasoning mechanics at minimal latencies.
 * **LangChain** for `LangGraph.js` making stateful routing structurally sustainable.
 
 <br />
 <div align="center">
-  <b>Architected by the CostIntel Team — ET GenAI Hackathon 2026</b>
+  <b>Architected by Adarsh Dwivedi — Cost Intel Intelligence</b>
 </div>
