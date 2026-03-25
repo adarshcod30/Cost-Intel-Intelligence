@@ -4,8 +4,8 @@ import {
   getRecentTickets, 
   logEvent, 
   insertPendingActions 
-} from '../aws_infrastructure/dynamo';
-import { callBedrockJson } from '../aws_infrastructure/bedrock';
+} from '../aws/dynamo';
+import { callBedrockJSON } from '../aws/bedrock';
 
 // --- NODES ---
 
@@ -99,16 +99,17 @@ export const analysisNode = async (state: PipelineState): Promise<Partial<Pipeli
       Return ONLY pure JSON.
     `;
 
-  const result = await callBedrockJson(prompt);
+  const result = await callBedrockJSON(prompt) as Record<string, any>;
   
   await logEvent(state.run_id, 'root_cause', 'analysis_complete', {
-    actions: result.action_plan.length,
-    summary: result.summary,
+    actions: result.action_plan?.length || 0,
+    summary: result.summary || '',
   });
 
   return { 
-    action_plan: result.action_plan, 
-    analysis_summary: result.summary 
+    ...state,
+    analysis_summary: String(result.summary || ''),
+    action_plan: Array.isArray(result.action_plan) ? result.action_plan : []
   };
 };
 
