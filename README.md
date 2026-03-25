@@ -127,52 +127,70 @@ The **Cost Intel Intelligence** platform is designed as a highly cohesive, concu
     All cognitive processing routes through an abstraction layer to AWS Bedrock. For complex heuristic reasoning tasks (Root Cause Analysis, Decision Making), the system deploys **Amazon Nova Pro**. If token-limits or throttling occurs, a built-in semantic fallback mechanism automatically fails over to **Mistral Large** to ensure 99.99% analytical uptime.
 
 ```mermaid
-graph TD
-    %% Styling Rules
-    classDef ui fill:#0f172a,stroke:#3b82f6,stroke-width:2px,color:#f8fafc
-    classDef agent fill:#1e3a8a,stroke:#60a5fa,stroke-width:2px,color:#eff6ff
-    classDef aws fill:#374151,stroke:#f59e0b,stroke-width:2px,color:#fcfdff
-    classDef db fill:#064e3b,stroke:#10b981,stroke-width:2px,color:#ecfdf5
-    classDef highlight fill:#be185d,stroke:#f43f5e,stroke-width:3px,color:#fff
-    
-    subgraph Frontend["🖥️ Next.js 14 Dashboard Components"]
-        Dash[Executive Overview]
-        Sim[Simulation Lab]
-        Act[AI Action Queue]
-        Anom[Risk & Anomalies]
-        SLA[Impact Metrics]
-        Aud[Immutable Audit Trail]
-    end
+flowchart TB
 
-    subgraph AWS_Infra["☁️ AWS Serverless Infrastructure"]
-        DB[(DynamoDB Data Lake)]
-        Lambda[AWS Lambda Compute]
-        Bedrock[Amazon Bedrock LLM]
-    end
+%% ── STYLES ─────────────────────────
+classDef main fill:#0f172a,stroke:#3b82f6,color:#f8fafc,stroke-width:2px
+classDef core fill:#1e3a8a,stroke:#60a5fa,color:#eff6ff,stroke-width:2px
+classDef infra fill:#064e3b,stroke:#10b981,color:#ecfdf5,stroke-width:2px
+classDef aux fill:#292524,stroke:#f59e0b,color:#fef3c7,stroke-width:2px
+classDef hitl fill:#7c2d12,stroke:#fb923c,color:#fff7ed,stroke-width:2px
 
-    subgraph Pipeline["🧠 LangGraph.js 7-Agent Stateful Pipeline"]
-        A1(1. Ingest Agent) --> A2(2. Anomaly Agent)
-        A2 --> A3(3. SLA Predictor)
-        A3 --> A4(4. Root Cause)
-        A4 --> A5{5. Decision Maker}
-        A5 -->|P1/P2: HITL Review| A6(6. Action Router)
-        A5 -->|P3: Auto-Execute| A6
-        A6 --> A7(7. Audit Logger)
-    end
-    
-    %% Connections
-    Frontend <==>|tRPC / API Routes| Pipeline
-    Pipeline ===>|Event Triggers| Lambda
-    Lambda ===>|Read/Write Streams| DB
-    A5 ===>|Converse API| Bedrock
-    A7 ===>|Structured Logs| DB
+%% ── TOP LAYER ──────────────────────
+User["👤 User"]:::main
 
-    %% Assignments
-    class Dash,Sim,Act,Anom,SLA,Aud ui
-    class A1,A2,A3,A4,A6,A7 agent
-    class A5 highlight
-    class DB db
-    class Lambda,Bedrock aws
+subgraph App["🖥️ Application Layer"]
+    direction LR
+    UI["Dashboard (Insights, Actions, Audit)"]
+    API["API Routes (Trigger, Status, Approvals)"]
+end
+class App main
+
+%% ── CORE SYSTEM ────────────────────
+subgraph Core["🧠 AI System"]
+    direction TB
+    A1["Data Ingestion"]
+    A2["Anomaly Detection"]
+    A3["Risk / SLA Prediction"]
+    A4["Root Cause Analysis"]
+    A5["Decision Engine (LLM)"]
+    A6["Action Executor"]
+    A7["Audit Logger"]
+end
+class Core core
+
+%% ── INFRASTRUCTURE ─────────────────
+subgraph Infra["☁️ Infrastructure"]
+    direction LR
+    DB["🗄️ Data Store (Live + Audit)"]
+    LLM["🤖 LLM (Bedrock)"]
+    SIM["🎲 Simulation / Data Source"]
+end
+class Infra infra
+
+%% ── HUMAN LOOP ─────────────────────
+subgraph HITL["👤 Human-in-the-Loop"]
+    direction TB
+    H1["Approval Queue"]
+    H2["Approve / Reject"]
+end
+class HITL hitl
+
+%% ── FLOW ───────────────────────────
+User --> UI --> API --> A1
+
+A1 --> A2 --> A3 --> A4 --> A5 --> A6 --> A7
+
+%% infra connections
+A1 --> DB
+A6 --> DB
+A7 --> DB
+A5 --> LLM
+SIM --> DB
+
+%% HITL loop
+A6 -->|High-risk actions| H1
+H1 --> H2 --> A6
 ```
 
 
