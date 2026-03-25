@@ -17,8 +17,8 @@ const client = new BedrockRuntimeClient({
   } : {}),
 })
 
-const NOVA_LITE = 'amazon.nova-lite-v1:0'
-const MISTRAL   = 'mistral.mistral-large-2402-v1:0'
+const NOVA_LITE = process.env.BEDROCK_PRIMARY_MODEL  || 'amazon.nova-lite-v1:0'
+const MISTRAL   = process.env.BEDROCK_FALLBACK_MODEL || 'mistral.mistral-large-2402-v1:0'
 
 
 async function callNovaLite(prompt: string): Promise<string> {

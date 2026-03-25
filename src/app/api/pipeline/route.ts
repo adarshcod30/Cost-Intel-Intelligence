@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server'
 import { runSimulation } from '@/synthetic_data_engine/simulator'
 import { putInvoice, putTicket, logEvent } from '@/aws/dynamo'
 import { runPipeline } from '@/ai_agents/orchestrator'
+import { uploadToS3 } from '@/aws/s3'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: Request) {
@@ -41,6 +42,21 @@ export async function POST(request: Request) {
       sla_risks_found:  simOutput.breach_count,
       actions_taken:    autonomousActions,
     })
+
+    // Step 6: Save full report to S3 for persistent audit (replaces local file system)
+    await uploadToS3(`reports/run-${runId}.json`, JSON.stringify({
+      run_id: runId,
+      metrics: {
+        total_money_saved: totalMoneySaved,
+        anomaly_count: simOutput.anomaly_count,
+        breach_count: simOutput.breach_count,
+      },
+      raw_data: {
+        invoices: simOutput.invoices.length,
+        tickets: simOutput.tickets.length,
+      },
+      timestamp: simOutput.timestamp
+    }, null, 2));
 
     return NextResponse.json({
       run_id:               runId,

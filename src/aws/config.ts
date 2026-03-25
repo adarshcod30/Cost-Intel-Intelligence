@@ -16,13 +16,13 @@ export const DYNAMO_TABLE_NAMES = {
 };
 
 export const BEDROCK_MODELS = {
-  PRIMARY: 'amazon.nova-pro-v1:0',
-  FALLBACK: 'mistral.mistral-large-2402-v1:0',
+  PRIMARY:  process.env.BEDROCK_PRIMARY_MODEL  || 'amazon.nova-lite-v1:0',
+  FALLBACK: process.env.BEDROCK_FALLBACK_MODEL || 'mistral.mistral-large-2402-v1:0',
 };
 
 export const S3_BUCKETS = {
   MODELS: process.env.S3_BUCKET_MODELS || 'costintel-models-prod',
-  DATA: process.env.S3_BUCKET_DATA || 'costintel-data-prod',
+  DATA:   process.env.S3_BUCKET        || 'costintel-data-prod',
 };
 
 export const PIPELINE_CONFIG = {
