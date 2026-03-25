@@ -7,27 +7,31 @@ import {
 
 const client = new BedrockRuntimeClient({
   region: process.env.AWS_REGION || 'ap-south-1',
-  credentials: {
-    accessKeyId:     process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
+  // In production (Amplify), the SDK will automatically pick up IAM role credentials
+  // if these environment variables are not explicitly provided.
+  ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+    credentials: {
+      accessKeyId:     process.env.AWS_ACCESS_KEY_ID!,
+      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
+    }
+  } : {}),
 })
 
-const NOVA_PRO = 'amazon.nova-pro-v1:0'
-const MISTRAL  = 'mistral.mistral-large-2402-v1:0'
+const NOVA_LITE = 'amazon.nova-lite-v1:0'
+const MISTRAL   = 'mistral.mistral-large-2402-v1:0'
 
 
-async function callNovaPro(prompt: string): Promise<string> {
+async function callNovaLite(prompt: string): Promise<string> {
   const response = await client.send(new ConverseCommand({
-    modelId: NOVA_PRO,
+    modelId: NOVA_LITE,
     messages: [{ role: 'user', content: [{ text: prompt }] }],
     inferenceConfig: { maxTokens: 4096, temperature: 0.1 },
   }))
   const content = response.output?.message?.content
-  if (!content || content.length === 0) throw new Error('Nova Pro: empty response')
+  if (!content || content.length === 0) throw new Error('Nova Lite: empty response')
   const block = content[0]
-  if ('text' in block) return block.text
-  throw new Error('Nova Pro: no text block in response')
+  if ('text' in block && typeof block.text === 'string') return block.text
+  throw new Error('Nova Lite: no text block in response')
 }
 
 
@@ -49,14 +53,14 @@ async function callMistral(prompt: string): Promise<string> {
 
 
 export async function callBedrock(prompt: string): Promise<string> {
-  // Try Nova Pro first, fall back to Mistral automatically
+  // Try Nova Lite first, fall back to Mistral automatically
   try {
-    console.log('[Bedrock] Calling Nova Pro...')
-    const text = await callNovaPro(prompt)
-    console.log('[Bedrock] Nova Pro responded successfully.')
+    console.log('[Bedrock] Calling Nova Lite...')
+    const text = await callNovaLite(prompt)
+    console.log('[Bedrock] Nova Lite responded successfully.')
     return text
   } catch (e) {
-    console.warn('[Bedrock] Nova Pro failed, falling back to Mistral:', e)
+    console.warn('[Bedrock] Nova Lite failed, falling back to Mistral:', e)
     const text = await callMistral(prompt)
     console.log('[Bedrock] Mistral responded successfully.')
     return text
