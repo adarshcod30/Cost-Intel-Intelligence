@@ -11,10 +11,10 @@ export const SCENARIOS = {
 
 type ScenarioKey = keyof typeof SCENARIOS
 
-// Rotate scenario by hour so it changes naturally every hour
-export function getActiveScenario(): ScenarioKey {
+// Selected truly random every simulator call for maximum variety
+export function getRandomScenario(): ScenarioKey {
   const keys = Object.keys(SCENARIOS) as ScenarioKey[]
-  return keys[new Date().getHours() % keys.length]
+  return keys[Math.floor(Math.random() * keys.length)]
 }
 
 // Vendor pool generated fresh every simulator call (no seed)
@@ -149,7 +149,7 @@ export function runSimulation(
   nTickets:  number = 15,
   forceScenario?: ScenarioKey,
 ): SimulatorOutput {
-  const scenarioKey = forceScenario || getActiveScenario()
+  const scenarioKey = forceScenario || getRandomScenario()
   const scenario    = SCENARIOS[scenarioKey]
   const vendors     = generateVendorPool(60)
 

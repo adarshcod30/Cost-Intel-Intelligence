@@ -2,6 +2,7 @@
 import { NextResponse } from 'next/server'
 import { runSimulation } from '@/synthetic_data_engine/simulator'
 import { putInvoice, putTicket, logEvent } from '@/aws/dynamo'
+import { runPipeline } from '@/ai_agents/orchestrator'
 import { v4 as uuidv4 } from 'uuid'
 
 export async function POST(request: Request) {
@@ -26,14 +27,13 @@ export async function POST(request: Request) {
       anomaly_count: simOutput.anomaly_count,
     })
 
-    // Step 4: Run agent pipeline
-    // Import your orchestrator here when it's built
-    // const result = await runPipeline(runId, simOutput)
+    // Step 4: Run actual 7-agent pipeline
+    const pipelineResult = await runPipeline(30, runId, simOutput.scenario);
 
-    // For now: compute impact from simulation output directly
+    // Step 5: compute impact from pipeline results
     const totalMoneySaved     = simOutput.total_leakage
     const slapenalty          = simOutput.tickets.reduce((s, t) => s + t.penalty_inr, 0)
-    const autonomousActions   = simOutput.anomaly_count + simOutput.breach_count
+    const autonomousActions   = pipelineResult.action_plan?.length || (simOutput.anomaly_count + simOutput.breach_count)
 
     await logEvent(runId, 'orchestrator', 'run_complete', {
       total_impact_inr: totalMoneySaved + slapenalty,

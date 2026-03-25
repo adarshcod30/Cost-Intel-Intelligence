@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Zap, TerminalSquare, RefreshCw, Layers, CheckCircle } from "lucide-react";
+import { motion } from "framer-motion";
+import { TerminalSquare, RefreshCw, Layers, CheckCircle, Activity } from "lucide-react";
 
 export default function AuditPage() {
   const [logs, setLogs] = useState<any[]>([]);
@@ -28,87 +29,88 @@ export default function AuditPage() {
       .catch(() => setLoading(false));
   }, []);
 
-  const TopNav = () => (
-    <header className="border-b bg-card/80 backdrop-blur-md sticky top-0 z-50">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-2 font-bold text-xl tracking-tight text-primary">
-          <Zap className="h-6 w-6 text-yellow-500 fill-yellow-500/20" />
-          CostIntel
-        </div>
-        <nav className="hidden md:flex items-center gap-8 text-sm font-medium">
-          <Link href="/" className="text-muted-foreground hover:text-primary transition-colors">Overview</Link>
-          <Link href="/actions" className="text-muted-foreground hover:text-primary transition-colors">AI Actions</Link>
-          <Link href="/anomalies" className="text-muted-foreground hover:text-primary transition-colors">Risks & Anomalies</Link>
-          <Link href="/sla" className="text-muted-foreground hover:text-primary transition-colors">Impact</Link>
-          <Link href="/audit" className="text-primary transition-colors border-b-2 border-primary py-5">Audit Trail</Link>
-        </nav>
-      </div>
-    </header>
-  );
-
   return (
-    <div className="min-h-screen bg-[#020617] text-slate-50 flex flex-col">
-      <TopNav />
-      <main className="flex-1 container mx-auto px-4 py-8 max-w-5xl">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold tracking-tight mb-2 flex items-center gap-3">
-            <TerminalSquare className="h-8 w-8 text-slate-400" />
-            Technical Audit Trail
-          </h1>
-          <p className="text-slate-400 max-w-3xl">
-            A transparent, chronological log of exactly what the multi-agent AI system executed behind the scenes.
-            Optional view for system administrators and compliance teams.
-          </p>
+    <div className="min-h-screen bg-[#050505] text-white py-12 px-8 selection:bg-blue-500/30">
+      <main className="container mx-auto max-w-5xl">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-8 mb-16">
+          <div className="max-w-2xl">
+            <div className="flex items-center gap-3 text-white/40 mb-4">
+               <TerminalSquare className="h-5 w-5" />
+               <span className="text-[10px] font-black uppercase tracking-[0.4em]">Technical Multi-Agent Tracing</span>
+            </div>
+            <h1 className="text-5xl md:text-6xl font-black tracking-tighter mb-6">
+              Audit <span className="text-white/40">Trail.</span>
+            </h1>
+            <p className="text-white/40 text-xl font-medium tracking-tight leading-relaxed">
+              A transparent, chronological log of exactly what the multi-agent AI system executed 
+              behind the scenes. Full observability for compliance and system auditing.
+            </p>
+          </div>
+          <div className="flex items-center gap-2 bg-white/5 px-4 py-2 rounded-xl border border-white/10 backdrop-blur-3xl transition-all hover:bg-white/10">
+             <RefreshCw className={`h-3 w-3 text-blue-400 ${loading ? 'animate-spin' : ''}`} />
+             <span className="text-[10px] font-black uppercase tracking-widest text-white/40">Observability Active</span>
+          </div>
         </div>
 
-        <div className="bg-slate-900 border border-white/10 rounded-xl overflow-hidden shadow-sm">
-          <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between bg-slate-950/50">
-            <h2 className="font-semibold text-lg flex items-center gap-2 text-slate-300">
-              <Layers className="h-5 w-5 text-indigo-400" /> 
-              Multi-Agent Traces
+        <div className="bg-zinc-900/30 border border-white/5 rounded-[2.5rem] overflow-hidden backdrop-blur-3xl shadow-2xl">
+          <div className="px-10 py-8 border-b border-white/5 flex items-center justify-between bg-white/[0.01]">
+            <h2 className="text-xl font-black flex items-center gap-3 uppercase tracking-tighter">
+              <Layers className="h-5 w-5 text-blue-500" /> 
+              Multi-Agent Execution Log
             </h2>
-            <div className="text-xs font-medium text-slate-500 flex items-center gap-1">
-              Read-only system log
+            <div className="text-[10px] font-black text-white/40 uppercase tracking-widest">
+              Read-Only System Trace
             </div>
           </div>
           
           <div className="p-0">
             {loading ? (
-              <div className="p-12 text-center text-slate-500">
-                <RefreshCw className="h-8 w-8 animate-spin mx-auto mb-4 text-primary" />
-                Loading execution traces...
+              <div className="p-24 text-center">
+                <RefreshCw className="h-12 w-12 animate-spin mx-auto mb-6 text-white/30" />
+                <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white/40">Decrypting Traces...</p>
               </div>
             ) : logs.length === 0 ? (
-              <div className="p-12 text-center text-slate-500">
-                No technical logs found. Run a simulation first.
+              <div className="p-24 text-center">
+                <p className="text-lg font-bold text-white/30 uppercase tracking-widest italic">No technical logs found in current state.</p>
               </div>
             ) : (
               <div className="divide-y divide-white/5">
                 {logs.map((log, i) => (
-                  <div key={i} className="p-6 hover:bg-white/5 transition-colors">
-                    <div className="flex items-center gap-3 mb-3">
-                      <div className="bg-indigo-500/10 text-indigo-400 border border-indigo-500/20 px-2.5 py-1 rounded text-xs font-bold uppercase tracking-wider">
-                        Agent: {log.agent}
+                  <motion.div 
+                    key={i} 
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: i * 0.05 }}
+                    className="p-8 hover:bg-white/[0.02] transition-colors group"
+                  >
+                    <div className="flex items-center gap-4 mb-6">
+                      <div className="bg-blue-500/10 text-blue-500 border border-blue-500/20 px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">
+                        AGENT: {log.agent}
                       </div>
-                      <span className="text-sm font-mono text-slate-500">{new Date(log.timestamp).toLocaleTimeString()}</span>
-                      {i === logs.length - 1 && <span className="flex h-2 w-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.8)] ml-auto animate-pulse"></span>}
+                      <span className="text-xs font-mono text-white/40 uppercase tracking-widest">{new Date(log.timestamp).toLocaleTimeString()}</span>
+                      {i === 0 && (
+                        <span className="ml-auto inline-flex items-center gap-2">
+                           <span className="h-2 w-2 rounded-full bg-green-500 shadow-[0_0_15px_rgba(34,197,94,0.6)] animate-pulse" />
+                           <span className="text-[10px] font-black text-white/40 uppercase tracking-widest">Latest Transition</span>
+                        </span>
+                      )}
                     </div>
                     
-                    <div className="bg-[#0f172a] rounded-lg p-4 font-mono text-sm text-slate-300 overflow-x-auto border border-slate-800">
-                      <div className="text-indigo-300 mb-2 font-bold flex items-center gap-2">
-                        <TerminalSquare className="h-4 w-4" /> {log.event.toUpperCase()}
+                    <div className="bg-black/40 rounded-2xl p-6 border border-white/5 group-hover:border-white/10 transition-colors">
+                      <div className="text-blue-400 mb-4 font-black flex items-center gap-2 text-sm uppercase tracking-tighter">
+                        <Activity className="h-4 w-4" /> {log.event.replace(/_/g, " ")}
                       </div>
-                      <pre className="text-xs text-slate-400">
+                      <pre className="text-xs text-white/40 font-mono leading-relaxed overflow-x-auto selection:bg-blue-500/40 selection:text-white">
                         {JSON.stringify(log.payload, null, 2)}
                       </pre>
                     </div>
-                  </div>
+                  </motion.div>
                 ))}
                 
                 {logs.length > 0 && (
-                  <div className="p-6 bg-green-500/5 text-center flex items-center justify-center gap-2 border-t border-green-500/20">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="text-green-400 font-medium">Pipeline execution successfully terminated.</span>
+                  <div className="p-10 bg-green-500/5 text-center flex items-center justify-center gap-3 border-t border-green-500/10">
+                    <CheckCircle className="h-5 w-5 text-green-500/40" />
+                    <span className="text-[10px] font-black text-green-500/40 uppercase tracking-[0.5em]">Pipeline Sequence Terminated Correctfully</span>
                   </div>
                 )}
               </div>

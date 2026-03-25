@@ -3,6 +3,7 @@ import { BaseMessage } from "@langchain/core/messages";
 
 export const PipelineStateAnnotation = Annotation.Root({
   run_id: Annotation<string>(),
+  scenario: Annotation<string>(),
   started_at: Annotation<string>(),
   sample_size: Annotation<number>(),
   window_minutes: Annotation<number>(),

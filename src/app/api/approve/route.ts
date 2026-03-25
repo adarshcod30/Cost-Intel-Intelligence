@@ -1,6 +1,29 @@
 // src/app/api/approve/route.ts
 import { NextResponse } from 'next/server'
-import { updateActionStatus } from '@/aws/dynamo'
+import { updateActionStatus, getActionsForRun, getAllRuns } from '@/aws/dynamo'
+
+export const dynamic = 'force-dynamic'
+
+export async function GET(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    let runId = searchParams.get('run_id')
+
+    // If no run_id provided, get the latest run
+    if (!runId) {
+      const runs = await getAllRuns()
+      if (runs.length === 0) {
+        return NextResponse.json({ actions: [] })
+      }
+      runId = runs[0].run_id
+    }
+
+    const actions = await getActionsForRun(runId!)
+    return NextResponse.json({ actions, run_id: runId })
+  } catch (error) {
+    return NextResponse.json({ error: String(error) }, { status: 500 })
+  }
+}
 
 export async function POST(request: Request) {
   try {

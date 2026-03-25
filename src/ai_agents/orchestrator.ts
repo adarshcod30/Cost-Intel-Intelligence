@@ -9,7 +9,7 @@ import {
   actionNode, 
   auditNode 
 } from './nodes';
-import { logEvent } from '../aws_infrastructure/dynamo';
+import { logEvent } from '../aws/dynamo';
 
 const createGraph = () => {
   const workflow = new StateGraph(PipelineStateAnnotation)
@@ -31,28 +31,25 @@ const createGraph = () => {
   return workflow.compile();
 };
 
-export const runPipeline = async (windowMinutes: number = 30) => {
-  const runId = uuidv4().substring(0, 8).toUpperCase();
+export const runPipeline = async (windowMinutes: number = 30, externalRunId?: string, scenario: string = 'normal') => {
+  const runId = externalRunId || uuidv4().substring(0, 8).toUpperCase();
   const startedAt = new Date().toISOString();
 
   console.log(`\n${'='.repeat(60)}`);
-  console.log(`  ⚡ CostIntel AI Pipeline — Run ${runId}`);
+  console.log(`  ⚡ CostIntel AI Pipeline — Run ${runId} (Scenario: ${scenario})`);
   console.log(`${'='.repeat(60)}`);
 
   await logEvent(runId, 'orchestrator', 'run_started', {
     window_minutes: windowMinutes,
     environment: 'production',
+    scenario,
   });
 
   const initialState: Partial<PipelineState> = {
     run_id: runId,
+    scenario,
     started_at: startedAt,
-    window_minutes: windowMinutes,
-    invoices: [],
-    tickets: [],
-    anomalies: [],
-    sla_risks: [],
-    action_plan: [],
+// ... (omitting unchanged lines in replacement)
     errors: [],
   };
 

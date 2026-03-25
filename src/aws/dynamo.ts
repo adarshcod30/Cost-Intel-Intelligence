@@ -119,12 +119,24 @@ export async function getAllRuns() {
     FilterExpression: '#e = :e',
     ExpressionAttributeNames:  { '#e': 'event', '#ts': 'timestamp' },
     ExpressionAttributeValues: { ':e': 'run_started' },
-    ProjectionExpression: 'run_id, #ts',
-    // Note: need alias for timestamp too since it might be reserved
+    ProjectionExpression: 'run_id, #ts, payload',
   }))
-  return (result.Items || []).sort(
+  return (result.Items || []).map(item => ({
+    run_id: item.run_id,
+    timestamp: item.timestamp,
+    scenario: item.payload?.scenario || 'normal',
+  })).sort(
     (a, b) => (b.timestamp || '').localeCompare(a.timestamp || '')
   )
+}
+
+export async function getActionsForRun(runId: string) {
+  const result = await docClient.send(new ScanCommand({
+    TableName:        APPROVAL_TABLE,
+    FilterExpression: 'run_id = :r',
+    ExpressionAttributeValues: { ':r': runId },
+  }))
+  return result.Items || []
 }
 
 

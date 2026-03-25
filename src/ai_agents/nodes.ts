@@ -6,6 +6,7 @@ import {
   insertPendingActions 
 } from '../aws/dynamo';
 import { callBedrockJSON } from '../aws/bedrock';
+import { v4 as uuidv4 } from 'uuid';
 
 // --- NODES ---
 
@@ -45,6 +46,16 @@ export const anomalyNode = async (state: PipelineState): Promise<Partial<Pipelin
   await logEvent(state.run_id, 'anomaly_detection', 'anomalies_detected', {
     count: anomalies.length,
     estimated_leakage_inr: anomalies.reduce((sum, a) => sum + a.estimated_leakage, 0),
+    anomalies: anomalies.slice(0, 20).map(a => ({
+      invoice_id: a.invoice_id || a.pk?.replace('INVOICE#', '') || 'N/A',
+      anomaly_type: a.anomaly_type || 'cost_spike',
+      vendor_name: a.vendor_name || 'Unknown Vendor',
+      service_type: a.service_type || 'Cloud Services',
+      category: a.category || 'Infrastructure',
+      cost: a.estimated_leakage || a.invoice_amount || 0,
+      anomaly_score: a.anomaly_score,
+      impact: a.estimated_leakage,
+    })),
   });
 
   return { anomalies };
@@ -80,10 +91,17 @@ export const analysisNode = async (state: PipelineState): Promise<Partial<Pipeli
     const prompt = `
       You are CostIntel, an advanced enterprise AI analyst powered by Amazon Nova Pro.
       Analyze these deeply specific, real-time cost leakages and SLA risks for an Indian enterprise (INR / ₹).
-
+      
+      CURRENT OPERATIONAL SCENARIO: ${state.scenario}
+      
       Anomalies Detected (JSON): ${JSON.stringify(state.anomalies.slice(0, 10))}
       SLA Risks Detected (JSON): ${JSON.stringify(state.sla_risks.slice(0, 10))}
 
+      UNIFORMITY WARNING: Avoid generic language. Each run must sound distinct.
+      If scenario is 'festive_rush', focus on scale and volume.
+      If scenario is 'sla_crisis', focus on penalty mitigation and urgent rerouting.
+      If scenario is 'vendor_spike', focus on procurement discipline.
+      
       CRITICAL RESTRICTION: Do not generate generic responses. EVERY output must be strictly unique to the specific vendor_name, anomaly_type, and ticket IDs provided above. Vary your executive summary completely based on the exact numbers provided.
       
       Produce a JSON object with:
@@ -116,8 +134,14 @@ export const analysisNode = async (state: PipelineState): Promise<Partial<Pipeli
 export const actionNode = async (state: PipelineState): Promise<Partial<PipelineState>> => {
   console.log(`  ⚡ [Action] Executing autonomous actions...`);
   
-  const auto_executed = state.action_plan.filter(a => a.priority === 'P3');
-  const pending = state.action_plan.filter(a => a.priority !== 'P3');
+  // Ensure every action has a unique action_id
+  const enrichedPlan = state.action_plan.map(a => ({
+    ...a,
+    action_id: a.action_id || uuidv4().replace(/-/g, '').slice(0, 10).toUpperCase(),
+  }));
+
+  const auto_executed = enrichedPlan.filter(a => a.priority === 'P3');
+  const pending = enrichedPlan.filter(a => a.priority !== 'P3');
 
   // simulated auto-execution log
   for (const a of auto_executed) {
@@ -127,6 +151,12 @@ export const actionNode = async (state: PipelineState): Promise<Partial<Pipeline
   if (pending.length > 0) {
     await insertPendingActions(pending, state.run_id);
     console.log(`     🔒 HELD: ${pending.length} actions for HITL approval.`);
+  }
+
+  // Also insert auto-executed actions so they show up in the Activity Log
+  if (auto_executed.length > 0) {
+    const autoActionsWithStatus = auto_executed.map(a => ({ ...a, status: 'executed' }));
+    await insertPendingActions(autoActionsWithStatus, state.run_id);
   }
 
   await logEvent(state.run_id, 'action_executor', 'execution_complete', {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getRunEvents } from '@/aws_infrastructure/dynamo';
+import { getRunEvents } from '@/aws/dynamo';
 
 export async function GET(
   request: Request,

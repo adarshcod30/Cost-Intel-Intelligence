@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getAllRuns } from '@/aws_infrastructure/dynamo';
+import { getAllRuns } from '@/aws/dynamo';
 
 export const dynamic = 'force-dynamic';
 
