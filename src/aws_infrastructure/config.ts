@@ -1,0 +1,43 @@
+import dotenv from 'dotenv';
+dotenv.config();
+
+export const AWS_CONFIG = {
+  region: process.env.AWS_REGION || 'ap-south-1',
+  credentials: {
+    accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+  },
+};
+
+export const DYNAMO_TABLE_NAMES = {
+  STREAM: process.env.DYNAMO_STREAM_TABLE || 'costintel-live-stream',
+  AUDIT: process.env.DYNAMO_AUDIT_TABLE || 'costintel-audit-log',
+  APPROVALS: process.env.DYNAMO_APPROVAL_TABLE || 'costintel-approvals',
+};
+
+export const BEDROCK_MODELS = {
+  PRIMARY: 'amazon.nova-pro-v1:0',
+  FALLBACK: 'mistral.mistral-large-2402-v1:0',
+};
+
+export const S3_BUCKETS = {
+  MODELS: process.env.S3_BUCKET_MODELS || 'costintel-models-prod',
+  DATA: process.env.S3_BUCKET_DATA || 'costintel-data-prod',
+};
+
+export const PIPELINE_CONFIG = {
+  DEFAULT_WINDOW_MINUTES: 30,
+  BEDROCK_MAX_TOKENS: 4096,
+  BEDROCK_TEMPERATURE: 0.1,
+};
+
+export const config = {
+  region: AWS_CONFIG.region,
+  credentials: AWS_CONFIG.credentials,
+  tables: {
+    stream: DYNAMO_TABLE_NAMES.STREAM,
+    audit: DYNAMO_TABLE_NAMES.AUDIT,
+    approvals: DYNAMO_TABLE_NAMES.APPROVALS,
+  },
+  isLocal: process.env.AWS_MODE === 'local',
+};
