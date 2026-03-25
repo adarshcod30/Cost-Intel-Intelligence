@@ -14,8 +14,8 @@ export async function POST(request: Request) {
 
     // Step 2: Write to DynamoDB stream table
     await Promise.all([
-      ...simOutput.invoices.map(inv => putInvoice(inv as Record<string, unknown>)),
-      ...simOutput.tickets.map(tkt => putTicket(tkt as Record<string, unknown>)),
+      ...simOutput.invoices.map(inv => putInvoice(inv as unknown as Record<string, unknown>)),
+      ...simOutput.tickets.map(tkt => putTicket(tkt as unknown as Record<string, unknown>)),
     ])
 
     // Step 3: Log pipeline start

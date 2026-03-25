@@ -43,8 +43,8 @@ async function callMistral(prompt: string): Promise<string> {
     contentType: 'application/json',
     accept:      'application/json',
   }))
-  const result = JSON.parse(Buffer.from(response.body).toString())
-  return result.outputs?.[0]?.text || ''
+  const result = JSON.parse(Buffer.from(response.body || new Uint8Array()).toString())
+  return String(result.outputs?.[0]?.text || '')
 }
 
 
