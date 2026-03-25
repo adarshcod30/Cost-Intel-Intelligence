@@ -113,9 +113,18 @@ Fully serverless AWS stack running in `ap-south-1` (Mumbai) for low latency. Use
 
 ---
 
-## Architecture — Full System Architecture
+## 🧠 1. Core System Architecture
 
-Cost Intel Intelligence follows a clean separation between the **presentation layer** (Next.js 14 Dashboard), the **intelligence layer** (LangGraph.js Pipeline + Bedrock), and the **persistence layer** (DynamoDB).
+The **Cost Intel Intelligence** platform is designed as a highly cohesive, concurrently executing web application. By fundamentally decoupling the UI presentation layer from the deep AI-orchestration layer, the platform guarantees that intense machine-learning workloads never block or degrade the user experience.
+
+### Architectural Tiers
+
+1.  **Presentation & API Layer (Next.js 14 App Router):**
+    Handles static asset delivery, server-side dynamic rendering (`React Server Components`), and exposes lightweight asynchronous API endpoints (`/api/runs`, `/api/approve`). This layer is styled heavily with `Vanilla CSS` and `Framer Motion` for high-fidelity interactive elements, seamlessly providing a polished interface for human oversight.
+2.  **Stateful Persistence Layer (Amazon DynamoDB):**
+    Unlike standard relational setups, the system requires ultra-low latency document reads/writes for agent state tracking. The DynamoDB implementation (`live-stream`, `approvals`, `audit-log` tables) acts as the single source of truth, creating a fully immutable ledger of every AI decision executed across the pipeline.
+3.  **Intelligence Layer (AWS Bedrock Foundation Models):**
+    All cognitive processing routes through an abstraction layer to AWS Bedrock. For complex heuristic reasoning tasks (Root Cause Analysis, Decision Making), the system deploys **Amazon Nova Pro**. If token-limits or throttling occurs, a built-in semantic fallback mechanism automatically fails over to **Mistral Large** to ensure 99.99% analytical uptime.
 
 ```mermaid
 graph TD
@@ -183,9 +192,20 @@ Each agent in the Cost Intel Intelligence pipeline is a pure function that updat
 | **ACTION** | Routes P3 to auto-execute, P1/P2 to DB | Action plan | Executed actions + pending queue | Logs failure, continues pipeline |
 | **AUDIT** | Writes complete immutable event record | Full run state | Immutable audit entry | Retries 3× before failure |
 
-### LangGraph State Machine Flow
+---
 
-> 📸 **Trace Telemetry:** Expanding the JSON payload of a single autonomous node transition.
+## ⚙️ LangGraph Autonomous State Machine Flow
+
+While the System Architecture dictates the *infrastructure*, the **LangGraph Orchestration Flow** controls the *cognitive logic*. 
+
+The orchestration pipeline is not a linear script; it is a cyclic, state-driven Graph built on `LangGraph.js`. The state machine marshals an immutable context object (containing `syntheticData`, `anomalies`, `actions`, and `approvals`) across seven discrete nodes.
+
+### How State is Compiled and Passed
+1.  **Node Execution:** An agent (e.g., the `AnomalyDetector`) receives the current state, executes its LLM chain bound to a specific prompt template, and appends its findings (like Z-score identified leakage points) back to the state object.
+2.  **Conditional Routing:** Edges between nodes dictate logic. For example, if the `DecisionEngine` determines an action is a `P1` (critical threshold) requiring human oversight, the graph conditionally routes to the `SLA/Approval` node instead of immediately executing.
+3.  **State Preservation:** The final payload represents a deterministic ledger of the complete run, tracking exactly which model provided which rationalization.
+
+> 📸 **Trace Telemetry:** Expanding the raw JSON payload of a single autonomous graph transition.
 > ![Audit Trace Payload](docs/screenshots/audit_trace_detail.png)
 
 ```mermaid
