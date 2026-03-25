@@ -1,5 +1,5 @@
 <div align="center">
-  <h1>⚡ CostIntel</h1>
+  <h1>⚡ Cost Intel Intelligence</h1>
   <p><b>Enterprise Cost Intelligence & Autonomous Action</b></p>
   <p><i>A 7-agent AI pipeline that watches enterprise finances 24/7, catches cost leakage before money leaves, and acts autonomously — with a human always in the loop for high-stakes decisions.</i></p>
 
