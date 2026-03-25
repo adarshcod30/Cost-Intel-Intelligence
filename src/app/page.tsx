@@ -348,16 +348,19 @@ export default function Home() {
             { label: "Cost Leakage Prevented", val: (leakage/100000).toFixed(2), unit: "L", icon: Search, color: "text-blue-400", meta: `From ${apiData?.anomaly_count || 43} anomalies` },
             { label: "SLA Penalty Avoided", val: (penalty/100000).toFixed(2), unit: "L", icon: AlertTriangle, color: "text-amber-500", meta: `From ${apiData?.sla_risk_count || 118} risks` },
             { label: "Autonomous Actions", val: apiData?.total_actions || 20, unit: "", icon: Zap, color: "text-primary", meta: "Active AI execution" },
-          ].map((kpi, idx) => (
-            <motion.div key={idx} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 * idx }} className="rounded-xl border border-white/10 bg-slate-900/50 p-6 shadow-sm overflow-hidden relative">
-              <div className="flex items-center justify-between mb-4">
-                <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">{kpi.label}</h3>
-                <kpi.icon className={`h-5 w-5 ${kpi.color}`} />
-              </div>
-              <div className="text-3xl font-bold mb-1">₹{kpi.val}{kpi.unit}</div>
-              <p className="text-xs text-slate-500 font-medium">{kpi.meta}</p>
-            </motion.div>
-          ))}
+          ].map((kpi, idx) => {
+            const Icon = kpi.icon;
+            return (
+              <motion.div key={idx} initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: 0.1 * idx }} className="rounded-xl border border-white/10 bg-slate-900/50 p-6 shadow-sm overflow-hidden relative">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="text-sm font-medium text-slate-400 uppercase tracking-wider">{kpi.label}</h3>
+                  <Icon className={`h-5 w-5 ${kpi.color}`} />
+                </div>
+                <div className="text-3xl font-bold mb-1">₹{kpi.val}{kpi.unit}</div>
+                <p className="text-xs text-slate-500 font-medium">{kpi.meta}</p>
+              </motion.div>
+            );
+          })}
         </div>
 
         <div className="grid md:grid-cols-3 gap-8">
