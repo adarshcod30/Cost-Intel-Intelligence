@@ -15,6 +15,8 @@ export const ingestionNode = async (state: PipelineState): Promise<Partial<Pipel
   const invoices = await getRecentInvoices(state.window_minutes);
   const tickets = await getRecentTickets(state.window_minutes);
   
+  console.log(`  📊 [Ingestion Result] Found ${invoices.length} invoices, ${tickets.length} tickets.`);
+  
   await logEvent(state.run_id, 'data_ingestion', 'ingestion_complete', {
     procurement_rows: invoices.length,
     sla_rows: tickets.length,
@@ -58,6 +60,7 @@ export const anomalyNode = async (state: PipelineState): Promise<Partial<Pipelin
     })),
   });
 
+  console.log(`  🎯 [Anomaly Result] Filtered ${anomalies.length} items from input pool.`);
   return { anomalies };
 };
 

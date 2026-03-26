@@ -6,6 +6,23 @@ import { runPipeline } from '@/ai_agents/orchestrator'
 import { uploadToS3 } from '@/aws/s3'
 import { v4 as uuidv4 } from 'uuid'
 
+export const dynamic = 'force-dynamic'
+
+export async function GET() {
+  return NextResponse.json({
+    status: 'online',
+    environment: {
+      REGION: process.env.REGION,
+      APP_MODE: process.env.APP_MODE,
+      TABLES: {
+        stream: process.env.DYNAMO_STREAM_TABLE,
+        audit: process.env.DYNAMO_AUDIT_TABLE,
+      },
+      S3: process.env.S3_BUCKET
+    }
+  })
+}
+
 export async function POST(request: Request) {
   const runId = uuidv4().replace(/-/g, '').slice(0, 8).toUpperCase()
 
@@ -13,6 +30,14 @@ export async function POST(request: Request) {
     // Step 1: Generate fresh dynamic data (different every single call)
     const simOutput = runSimulation(50, 15)
     console.log(`[Pipeline ${runId}] Scenario: ${simOutput.scenario}, Anomalies: ${simOutput.anomaly_count}`)
+
+    // Debug Log for Cloud Setup
+    console.log("ENV CHECK:", {
+      REGION: process.env.REGION,
+      APP_MODE: process.env.APP_MODE,
+      S3_BUCKET: process.env.S3_BUCKET,
+      TABLE: process.env.DYNAMO_STREAM_TABLE
+    });
 
     // Step 2: Write to DynamoDB stream table
     await Promise.all([
