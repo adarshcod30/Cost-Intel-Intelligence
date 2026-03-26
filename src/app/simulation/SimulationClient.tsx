@@ -65,6 +65,13 @@ export default function SimulationClient() {
     try {
       const resp = await fetch("/api/pipeline", { method: "POST" });
       const data = await resp.json();
+      
+      if (!resp.ok) {
+        addLog(`PIPELINE FAILED: ${data.details || data.error || 'Unknown error'}`, "warn");
+        setSimulationState("IDLE");
+        return;
+      }
+
       clearInterval(logTimer);
       clearInterval(stepTimer);
       
@@ -74,10 +81,10 @@ export default function SimulationClient() {
       setActiveStep(steps.length - 1);
       setResults(data);
       setSimulationState("COMPLETE");
-    } catch (err) {
+    } catch (err: any) {
       clearInterval(logTimer);
       clearInterval(stepTimer);
-      addLog("CRITICAL ERROR: Pipeline execution haulted.", "warn");
+      addLog(`CRITICAL ERROR: ${err.message || 'Pipeline execution halted.'}`, "warn");
       setSimulationState("IDLE");
     }
   };
