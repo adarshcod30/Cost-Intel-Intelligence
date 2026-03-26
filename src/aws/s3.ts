@@ -1,4 +1,5 @@
 import { S3Client, PutObjectCommand, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3_BUCKETS } from "./config";
 
 const s3 = new S3Client({
   region: process.env.REGION || 'us-east-1',
@@ -12,8 +13,9 @@ const s3 = new S3Client({
 });
 
 export async function uploadToS3(key: string, data: string) {
+  console.log(`[S3] Uploading to bucket: ${S3_BUCKETS.DATA}`);
   await s3.send(new PutObjectCommand({
-    Bucket: process.env.S3_BUCKET!,
+    Bucket: S3_BUCKETS.DATA,
     Key: key,
     Body: data,
     ContentType: 'application/json',
@@ -22,7 +24,7 @@ export async function uploadToS3(key: string, data: string) {
 
 export async function getFromS3(key: string) {
   const res = await s3.send(new GetObjectCommand({
-    Bucket: process.env.S3_BUCKET!,
+    Bucket: S3_BUCKETS.DATA,
     Key: key
   }));
   return res;
