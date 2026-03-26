@@ -3,9 +3,15 @@ dotenv.config();
 
 export const AWS_CONFIG = {
   region: process.env.REGION || 'us-east-1',
-  ...(process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY ? {
+  // Amplify blocks "AWS_" prefixed environment variables, so we look for APP_ prefixes or IAM role
+  ...((process.env.APP_ACCESS_KEY && process.env.APP_SECRET_KEY) ? {
     credentials: {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
+      accessKeyId: process.env.APP_ACCESS_KEY!,
+      secretAccessKey: process.env.APP_SECRET_KEY!,
+    }
+  } : (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) ? {
+    credentials: {
+      accessKeyId:     process.env.AWS_ACCESS_KEY_ID!,
       secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
     }
   } : {}),
