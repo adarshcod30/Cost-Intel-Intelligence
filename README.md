@@ -1,16 +1,27 @@
+</div>
+
+---
+
 <div align="center">
   <h1>⚡ Cost Intel Intelligence</h1>
   <p><b>Enterprise Cost Intelligence & Autonomous Action</b></p>
   <p><i>A 7-agent AI pipeline that watches enterprise finances 24/7, catches cost leakage before money leaves, and acts autonomously — with a human always in the loop for high-stakes decisions.</i></p>
 
+  <br />
+  <a href="https://main.d2akwim961corm.amplifyapp.com/">
+    <img src="https://img.shields.io/badge/LIVE_DEMO-VIEW_DASHBOARD-813DEF?style=for-the-badge&logo=rocket" alt="Live Demo" />
+  </a>
+  <p><b>🚀 Deployed on AWS Amplify:</b> <a href="https://main.d2akwim961corm.amplifyapp.com/">main.d2akwim961corm.amplifyapp.com</a></p>
+  <br />
+
   [![TypeScript](https://img.shields.io/badge/TypeScript-5.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
   [![Next.js](https://img.shields.io/badge/Next.js-14.2-000000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
-  [![AWS Bedrock](https://img.shields.io/badge/AWS_Bedrock-Nova_Pro-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/bedrock/)
+  [![AWS Bedrock](https://img.shields.io/badge/AWS_Bedrock-Nova_Lite-FF9900?style=for-the-badge&logo=amazonaws&logoColor=white)](https://aws.amazon.com/bedrock/)
   [![DynamoDB](https://img.shields.io/badge/DynamoDB-Serverless-4053D6?style=for-the-badge&logo=amazondynamodb&logoColor=white)](https://aws.amazon.com/dynamodb/)
   [![LangGraph.js](https://img.shields.io/badge/LangGraph.js-Orchestration-1C3C3C?style=for-the-badge&logo=langchain&logoColor=white)](https://langchain-ai.github.io/langgraphjs/)
-  [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg?style=for-the-badge)](LICENSE)
-
 </div>
+
+---
 
 <br />
 
@@ -63,7 +74,7 @@ Cost Intel Intelligence is an autonomous AI agent system. It is not just a dashb
 1. **Ingests Data:** Continuously reads procurement invoices and SLA tickets from a DynamoDB stream (mocking a live ERP feed like SAP or Oracle).
 2. **Detects Anomalies:** Scans 100% of transactions through a statistical isolation algorithm to identify pricing outliers, duplicates, and off-contract billing.
 3. **Predicts Breaches:** Forecasts which SLA tickets will breach their deadline before it happens using capacity and volume metrics.
-4. **Reasons & Synthesizes:** Passes findings to Amazon Bedrock's Nova Pro LLM, which synthesizes the raw data into a structured action plan.
+4. **Reasons & Synthesizes:** Passes findings to Amazon Bedrock's Nova Lite LLM, which synthesizes the raw data into a structured action plan.
 5. **Executes Autonomously:** Executes routine P3 actions (vendor blocks, payment holds) instantly.
 6. **Requires Human Approval:** Routes critical P1 and P2 actions to a human-in-the-loop approval queue.
 7. **Maintains Compliance:** Logs every single decision to an immutable DynamoDB audit trail.
@@ -84,8 +95,8 @@ Ships with 6 named enterprise scenarios (`normal`, `vendor_spike`, `sla_crisis`,
 > 📸 **Simulation Lab:** Real-time pipeline execution and logging.
 > ![Simulation Lab](docs/screenshots/simulation.png)
 
-### 3. Amazon Bedrock Reasoning (Nova Pro + Mistral Fallback)
-The Decision Agent uses `amazon.nova-pro-v1:0` via the Bedrock Converse API to synthesize ML findings into a structured JSON action plan. If Nova Pro fails (timeout, rate limit), the pipeline automatically falls back to `mistral.mistral-large-2402-v1:0` using the `[INST]` prompt format. **The pipeline never halts.**
+### 3. Amazon Bedrock Reasoning (Nova Lite + Mistral Fallback)
+The Decision Agent uses `amazon.nova-pro-v1:0` via the Bedrock Converse API to synthesize ML findings into a structured JSON action plan. If Nova Lite fails (timeout, rate limit), the pipeline automatically falls back to `mistral.mistral-large-2402-v1:0` using the `[INST]` prompt format. **The pipeline never halts.**
 
 ### 4. Statistical Anomaly Detection
 Uses statistical methods inspired by Isolation Forest principles. Detects three types of anomalies: `spike`, `off-contract`, and `duplicate_timing`. Each anomaly receives a dynamic severity score and an estimated INR leakage value.
@@ -109,7 +120,12 @@ Every pipeline run and agent decision is written to the `costintel-audit-log` Dy
 > ![Audit Trail](docs/screenshots/audit_trail.png)
 
 ### 8. Serverless AWS Infrastructure
-Fully serverless AWS stack running in `ap-south-1` (Mumbai) for low latency. Uses DynamoDB (`PAY_PER_REQUEST` + TTLs), EventBridge, and Lambda functions. 
+Fully serverless AWS stack optimized for **AWS Amplify**. 
+* **Compute**: Next.js 14 Serverless Functions
+* **Storage**: Amazon S3 (Report Persistence)
+* **Database**: Amazon DynamoDB (Audit & Actions)
+* **Intelligence**: Amazon Bedrock (Nova Lite + Mistral)
+* **Security**: IAM Role-based authentication (No hardcoded keys in cloud)
 
 ---
 
@@ -121,10 +137,12 @@ The **Cost Intel Intelligence** platform is designed as a highly cohesive, concu
 
 1.  **Presentation & API Layer (Next.js 14 App Router):**
     Handles static asset delivery, server-side dynamic rendering (`React Server Components`), and exposes lightweight asynchronous API endpoints (`/api/runs`, `/api/approve`). This layer is styled heavily with `Vanilla CSS` and `Framer Motion` for high-fidelity interactive elements, seamlessly providing a polished interface for human oversight.
-2.  **Stateful Persistence Layer (Amazon DynamoDB):**
-    Unlike standard relational setups, the system requires ultra-low latency document reads/writes for agent state tracking. The DynamoDB implementation (`live-stream`, `approvals`, `audit-log` tables) acts as the single source of truth, creating a fully immutable ledger of every AI decision executed across the pipeline.
+2.  **Stateful Persistence Layer (Amazon DynamoDB & S3):**
+    The system requires ultra-low latency for agent state tracking and high durability for final reports. 
+    * **DynamoDB**: Managed via `live-stream`, `approvals`, and `audit-log` tables for structured state.
+    * **Amazon S3**: Acts as the long-term vault for full-fidelity JSON reports generated after every pipeline run.
 3.  **Intelligence Layer (AWS Bedrock Foundation Models):**
-    All cognitive processing routes through an abstraction layer to AWS Bedrock. For complex heuristic reasoning tasks (Root Cause Analysis, Decision Making), the system deploys **Amazon Nova Pro**. If token-limits or throttling occurs, a built-in semantic fallback mechanism automatically fails over to **Mistral Large** to ensure 99.99% analytical uptime.
+    All cognitive processing routes through an abstraction layer to AWS Bedrock. For reasoning tasks, the system deploys **Amazon Nova Lite** (primary) and **Mistral Large** (fallback). Access is secured via IAM Service Roles, eliminating the need for environment-variable based credentials in production.
 
 ```mermaid
 flowchart TB
@@ -206,7 +224,7 @@ Each agent in the Cost Intel Intelligence pipeline is a pure function that updat
 | **ANOMALY** | Runs statistical detection across all invoices | Raw invoices | Anomaly findings + severity factors | Rule-based fallback (3× vendor average) |
 | **SLA** | Predicts breach probability for open tickets | Raw tickets | Breach risk list + penalty amounts | Rule-based fallback (capacity × volume threshold) |
 | **ROOT_CAUSE** | Classifies anomalies | Anomaly findings | Classified findings (spike/off-contract) | Uses top severity factor |
-| **DECISION** | Synthesizes action plan via Amazon Nova Pro | All findings | JSON action plan (P1/P2/P3) | **Mistral Large Fallback** |
+| **DECISION** | Synthesizes action plan via Amazon Nova Lite | All findings | JSON action plan (P1/P2/P3) | **Mistral Large Fallback** |
 | **ACTION** | Routes P3 to auto-execute, P1/P2 to DB | Action plan | Executed actions + pending queue | Logs failure, continues pipeline |
 | **AUDIT** | Writes complete immutable event record | Full run state | Immutable audit entry | Retries 3× before failure |
 
@@ -248,7 +266,7 @@ flowchart TB
     
     subgraph Cognitive Layer
         Decide{⚖️ 5. Decision Agent<br/><small>Synthesizes Action Plan</small>}
-        Nova[Amazon Nova Pro<br/><small>Primary Logic Engine</small>]
+        Nova[Amazon Nova Lite<br/><small>Primary Logic Engine</small>]
         Mistral[Mistral Large<br/><small>Failover Logic Engine</small>]
         
         RC ==> Decide
@@ -298,7 +316,7 @@ flowchart LR
     subgraph Process["AI Processing Pipeline"]
         AD[Anomaly Detection<br/>Model]
         SLA[SLA Breach<br/>Predictor]
-        LLM[Bedrock LLM<br/>Nova Pro]
+        LLM[Bedrock LLM<br/>Nova Lite]
     end
     
     subgraph Execution["Execution Routing"]
@@ -340,8 +358,9 @@ flowchart LR
 | Charts | Recharts | 2.13 | Financial waterfall and time-series charts |
 | Styling | Tailwind CSS | 3.4 | Utility-first, dark theme, rapid iteration |
 | Agent Orchestration | LangGraph.js | 0.2.19 | Stateful multi-agent graphs with conditional routing |
-| LLM Reasoning | Amazon Bedrock Nova Pro | v1:0 | Best-in-class reasoning for structured JSON output |
+| LLM Reasoning | Amazon Bedrock Nova Lite | v1:0 | Optimized for speed and cost while maintaining high reasoning capabilities |
 | LLM Fallback | Amazon Bedrock Mistral Large | 2402-v1:0 | Automatic failover — pipeline never stops |
+| Storage | Amazon S3 | SDK v3 | Persistent storage for immutable JSON audit reports |
 | Database | AWS DynamoDB | SDK v3 | Serverless, pay-per-request, TTL for auto-cleanup |
 | Mock Data | @faker-js/faker | 9.2 | Realistic Indian enterprise names and patterns |
 | Localisation | Intl.NumberFormat | ES | `en-IN` formatting (`formatINR`) for Rupee displays |
@@ -426,7 +445,7 @@ The active scenario is chosen purely dynamically per run to stress-test the pipe
 3. `costintel-approvals` — **TTL: 48h**. Temporary persistence for pending & reviewed HITL decisions.
 
 ### Bedrock Calling Strategy
-The `Bedrock Converse API` is utilized natively for Nova Pro to take advantage of its excellent structural adherence and reasoning logic. If restricted or timed out, the `InvokeModel API` intercepts the traffic via a generic text-generation prompt designed specifically to wrap structural constraints onto Mistral Large models, keeping the pipeline unbroken.
+The `Bedrock Converse API` is utilized natively for Nova Lite to take advantage of its excellent structural adherence and reasoning logic. If restricted or timed out, the `InvokeModel API` intercepts the traffic via a generic text-generation prompt designed specifically to wrap structural constraints onto Mistral Large models, keeping the pipeline unbroken.
 
 ---
 
@@ -457,7 +476,7 @@ Here is exactly how the system maps from its current state to a fully-scaled ent
 * **Current:** Actions are routed to a simulated execution queue on the Dashboard Actions Page.
 * **Production Scale:** The `Action Agent` gains secure Write-access via highly restricted IAM roles to intervene *before* cash leaves the business.
   * **Automated Intervention (P3):** Instantly hits the SAP API to place a "Payment Hold" flag on a confirmed duplicate invoice before the nightly treasury payment run clears.
-  * **Human Approvals (P1/P2):** Integrates directly into workflows via **Slack** or **Microsoft Teams**. The CFO receives an interactive Slack card showing the anomaly, the Amazon Nova Pro structural reasoning, and a one-click `[Approve Hold]` or `[Override]` button. 
+  * **Human Approvals (P1/P2):** Integrates directly into workflows via **Slack** or **Microsoft Teams**. The CFO receives an interactive Slack card showing the anomaly, the Amazon Nova Lite structural reasoning, and a one-click `[Approve Hold]` or `[Override]` button. 
 
 ### 4. Security, Compliance, & Infrastructure Scaling
 * **Role-Based Access Control (RBAC):** Implementation of strict JWT/OAuth2 flows via AWS Cognito. Vendor management teams can only review P2 actions strictly related to their specific vendor portfolio.
@@ -495,9 +514,35 @@ TOTAL ANNUAL ENTERPRISE VALUE DELIVERED: ₹24.61 Crore Return
 
 ---
 
-## Setup & Installation
+---
 
-**Prerequisites:** Node.js 20.x, an AWS Account (Bedrock Models enabled in `ap-south-1`).
+## 🚀 AWS Amplify Deployment Guide
+
+Cost Intel Intelligence is optimized for a zero-trust, serverless deployment on **AWS Amplify**.
+
+### 1. Repository Connection
+Connect your GitHub repository to the **AWS Amplify Console**. Amplify will automatically detect the Next.js 14 settings and configure the build settings.
+
+### 2. IAM Service Role (CRITICAL)
+Since the application runs serverless, it uses an **IAM Service Role** instead of static access keys for maximum security.
+1. Create an IAM Role with `AmazonS3FullAccess`, `AmazonDynamoDBFullAccess`, and `AmazonBedrockFullAccess`.
+2. Assign this role as the **Service Role** in your Amplify App settings.
+
+### 3. Environment Variables
+Configure the following non-reserved variables in the Amplify Console:
+* `REGION`: `us-east-1` (or your preferred Bedrock region)
+* `APP_MODE`: `cloud`
+* `S3_BUCKET`: `costintel-data-prod`
+* `DYNAMO_STREAM_TABLE`: `costintel-live-stream`
+* `DYNAMO_AUDIT_TABLE`: `costintel-audit-log`
+* `DYNAMO_APPROVAL_TABLE`: `costintel-approvals`
+
+### 4. Build & Deploy
+Once pushed, Amplify will build the NextJS application, instantiate the serverless functions, and map the environment variables. The application will be live at your `.amplifyapp.com` domain.
+
+---
+
+## Setup & Installation (Local Development)
 
 ```bash
 # 1. Clone & Install
@@ -505,21 +550,19 @@ git clone https://github.com/adarshcod30/Cost-Intel-Intelligence.git
 cd Cost-Intel-Intelligence
 npm install
 
-# 2. Configure Environment
+# 2. Configure Local Environment
 cp .env.example .env
-# Edit .env and supply your AWS_ACCESS_KEY_ID & AWS_SECRET_ACCESS_KEY
+# Edit .env and supply your local AWS credentials
 
-# 3. Provision AWS Tables (creates Stream, Audit & Approvals DynamoDB instances)
+# 3. Provision AWS Tables
+# This script must be run once to instantiate the DynamoDB tables in your region
 npx ts-node src/aws/deploy/create_tables.ts
 
-# 4. Enable Models
-# Access AWS Console -> Bedrock -> Model Access -> Enable:
-# - Amazon Nova Pro (amazon.nova-pro-v1:0)
-# - Mistral Large (mistral.mistral-large-2402-v1:0)
-
-# 5. Boot Up
-npm run dev
-# Accessible at http://localhost:3000
+# 4. Deploy to AWS Amplify
+# 1. Connect this repo to the AWS Amplify Console.
+# 2. Set the Environment Variables listed below.
+# 3. Attach an IAM Role to the Amplify App with Bedrock/DynamoDB/S3 permissions.
+# 4. Trigger build.
 ```
 
 ---
@@ -528,12 +571,15 @@ npm run dev
 
 | Variable | Requirement | Description |
 |---|---|---|
-| `AWS_ACCESS_KEY_ID` | **Required** | IAM Identity Access Key |
-| `AWS_SECRET_ACCESS_KEY` | **Required** | IAM Identity Secret Token |
-| `AWS_REGION` | **Required** | Base AWS Region (Targeting `ap-south-1`) |
-| `DYNAMO_STREAM_TABLE` | Optional | Override for: `costintel-live-stream` |
-| `DYNAMO_AUDIT_TABLE` | Optional | Override for: `costintel-audit-log` |
-| `DYNAMO_APPROVAL_TABLE` | Optional | Override for: `costintel-approvals` |
+| `REGION` | **Required** | Target AWS Region (e.g., `us-east-1`) |
+| `APP_MODE` | **Required** | Set to `cloud` for Amplify or `local` for dev |
+| `S3_BUCKET` | **Required** | The S3 bucket name for report storage |
+| `DYNAMO_STREAM_TABLE` | **Required** | The DynamoDB table for live data |
+| `DYNAMO_AUDIT_TABLE` | **Required** | The DynamoDB table for audit logs |
+| `DYNAMO_APPROVAL_TABLE` | **Required** | The DynamoDB table for approvals |
+| `BEDROCK_PRIMARY_MODEL` | Optional | Default: `amazon.nova-lite-v1:0` |
+| `AWS_ACCESS_KEY_ID` | *Local Only* | Not used in `cloud` mode (IAM Role preferred) |
+| `AWS_SECRET_ACCESS_KEY` | *Local Only* | Not used in `cloud` mode (IAM Role preferred) |
 
 ---
 
