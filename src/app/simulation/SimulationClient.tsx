@@ -45,7 +45,7 @@ export default function SimulationClient() {
       "Fetching 28,000+ invoice records from DynamoDB Stream...",
       "Running Statistical Z-Score Detector on transaction clusters...",
       "SCENARIO DETECTED: Scenario injection confirmed via Synthetic Engine.",
-      "Analyzing 14 potential anomalies with Amazon Nova Pro...",
+      "Analyzing 14 potential anomalies with Amazon Nova Lite...",
       "Generating Remediation Playbook for P1 escalations...",
       "Executing autonomous blocks on identified leakage points...",
     ];

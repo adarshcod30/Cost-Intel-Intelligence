@@ -89,10 +89,10 @@ export const slaNode = async (state: PipelineState): Promise<Partial<PipelineSta
 };
 
 export const analysisNode = async (state: PipelineState): Promise<Partial<PipelineState>> => {
-  console.log(`  🧠 [Analysis] Synthesizing findings with AWS Bedrock (Nova Pro)...`);
+  console.log(`  🧠 [Analysis] Synthesizing findings with AWS Bedrock (Nova Lite)...`);
   
     const prompt = `
-      You are CostIntel, an advanced enterprise AI analyst powered by Amazon Nova Pro.
+      You are CostIntel, an advanced enterprise AI analyst powered by Amazon Nova Lite.
       Analyze these deeply specific, real-time cost leakages and SLA risks for an Indian enterprise (INR / ₹).
       
       CURRENT OPERATIONAL SCENARIO: ${state.scenario}

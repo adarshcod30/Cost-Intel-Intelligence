@@ -48,10 +48,10 @@ const agents = [
   },
   {
     id: "reason", name: "LLM Reasoner", icon: Brain, color: "from-purple-500 to-violet-400",
-    desc: "Amazon Bedrock Nova Pro performs root-cause analysis — determining not just what went wrong, but why it happened and what the optimal remediation strategy should be.",
+    desc: "Amazon Bedrock Nova Lite performs root-cause analysis — determining not just what went wrong, but why it happened and what the optimal remediation strategy should be.",
     vision: "Fine-tuned private BERT clusters with domain-specific procurement knowledge graphs, RAG retrieval over internal policy documents, and multi-turn reasoning chains",
-    proto: "Amazon Bedrock (Nova Pro) with Mistral Large failover for real-time reasoning, scenario-aware prompts ensuring 100% unique analysis per run",
-    metrics: { model: "Nova Pro", fallback: "Mistral Large", latency: "~1.8s" },
+    proto: "Amazon Bedrock (Nova Lite) with Mistral Large failover for real-time reasoning, scenario-aware prompts ensuring 100% unique analysis per run",
+    metrics: { model: "Nova Lite", fallback: "Mistral Large", latency: "~1.8s" },
   },
   {
     id: "decision", name: "Decision Engine", icon: Zap, color: "from-blue-600 to-indigo-500",
@@ -93,7 +93,7 @@ const capabilities = [
   {
     icon: Brain, title: "LLM Root-Cause Analysis",
     desc: "Bedrock-powered reasoning that produces human-readable explanations of why anomalies occurred and what remediation steps to take.",
-    vision: "Private knowledge graphs + RAG retrieval", proto: "Amazon Nova Pro via Bedrock",
+    vision: "Private knowledge graphs + RAG retrieval", proto: "Amazon Nova Lite via Bedrock",
     detail: "Each analysis includes confidence scores, supporting evidence citations, and alternative hypotheses for transparent decision-making."
   },
   {
@@ -131,7 +131,7 @@ const capabilities = [
 /* ─── tech stack ─── */
 const techStack = [
   { name: "LangGraph.js", desc: "Stateful multi-agent orchestration with directed acyclic graph execution", icon: GitBranch },
-  { name: "Amazon Bedrock", desc: "Nova Pro inference with automatic Mistral Large failover", icon: Brain },
+  { name: "Amazon Bedrock", desc: "Nova Lite inference with automatic Mistral Large failover", icon: Brain },
   { name: "DynamoDB", desc: "Serverless NoSQL — stream, audit, and approval tables", icon: Database },
   { name: "Next.js 14", desc: "App Router with server-side rendering and API routes", icon: Globe },
   { name: "Framer Motion", desc: "Production-grade scroll-driven animations", icon: Layers },
@@ -141,7 +141,7 @@ const techStack = [
 /* ─── comparison data ─── */
 const comparisonRows = [
   { dimension: "Data Ingestion", vision: "Multi-region Kinesis streams at 50K events/sec with schema-on-read", proto: "DynamoDB stream simulation with 28K+ synthetic records per batch" },
-  { dimension: "Intelligence Layer", vision: "Fine-tuned BERT clusters with domain-specific procurement knowledge graphs", proto: "Amazon Bedrock (Nova Pro) with automatic Mistral Large failover" },
+  { dimension: "Intelligence Layer", vision: "Fine-tuned BERT clusters with domain-specific procurement knowledge graphs", proto: "Amazon Bedrock (Nova Lite) with automatic Mistral Large failover" },
   { dimension: "Automation", vision: "Direct SAP/Oracle ERP webhooks for contract enforcement and payment blocks", proto: "Autonomous API remediation with DynamoDB-backed approval queue" },
   { dimension: "Observability", vision: "OpenTelemetry + Datadog APM with distributed tracing across all agents", proto: "Real-time audit trace with per-agent JSON payloads in DynamoDB" },
   { dimension: "Scale", vision: "10K+ concurrent supplier feeds, sub-100ms P99 latency, multi-AZ", proto: "Single-region serverless (ap-south-1), ~2.4s end-to-end inference" },
@@ -153,7 +153,7 @@ const comparisonRows = [
 const howItWorks = [
   { step: "01", title: "Data Flows In", desc: "Enterprise procurement data — invoices, POs, contracts, cloud billing — streams into the ingestion layer. The prototype simulates this with a high-entropy synthetic data engine generating 28K+ realistic records per run.", icon: Server },
   { step: "02", title: "AI Detects Anomalies", desc: "Statistical analysis identifies pricing outliers, duplicate charges, and contract violations. Each anomaly is scored for severity (Z-score deviation) and tagged with affected vendor, category, and financial impact.", icon: Search },
-  { step: "03", title: "LLM Reasons About Causes", desc: "Amazon Bedrock Nova Pro receives the anomaly context and performs root-cause analysis. It generates human-readable explanations, supporting evidence, and recommends specific remediation strategies.", icon: Brain },
+  { step: "03", title: "LLM Reasons About Causes", desc: "Amazon Bedrock Nova Lite receives the anomaly context and performs root-cause analysis. It generates human-readable explanations, supporting evidence, and recommends specific remediation strategies.", icon: Brain },
   { step: "04", title: "System Decides & Acts", desc: "The Decision Engine classifies each issue as P1/P2/P3. Low-risk P3 issues are remediated autonomously. High-impact P1/P2 issues are routed to human reviewers with full context for approval.", icon: Zap },
   { step: "05", title: "Everything Is Audited", desc: "Every decision — from raw data to LLM reasoning to execution status — is fingerprinted with a unique RunID and stored in an immutable audit trail for compliance and post-mortem analysis.", icon: CheckCircle2 },
 ];
@@ -274,7 +274,7 @@ export default function OverviewPage() {
               { label: "Detected Leakage", value: leakage, suffix: "L", prefix: "₹", sub: "Per simulation run" },
               { label: "Autonomous Actions", value: actions, suffix: "", prefix: "", sub: "Self-remediated (P3)" },
               { label: "AI Agents", value: 7, suffix: "", prefix: "", sub: "LangGraph orchestrated" },
-              { label: "Inference Latency", value: 2.4, suffix: "s", prefix: "", sub: "Bedrock Nova Pro" },
+              { label: "Inference Latency", value: 2.4, suffix: "s", prefix: "", sub: "Bedrock Nova Lite" },
               { label: "SLA Breaches Avoided", value: 38, suffix: "%", prefix: "", sub: "Predictive guardrails" },
               { label: "Audit Coverage", value: 100, suffix: "%", prefix: "", sub: "Every decision traced" },
             ].map((stat, i) => (
@@ -310,7 +310,7 @@ export default function OverviewPage() {
                 {[
                   "Processes 28K+ procurement records per pipeline execution",
                   "7 specialized AI agents orchestrated by LangGraph.js state machine",
-                  "Amazon Bedrock (Nova Pro) for real-time LLM reasoning with Mistral failover",
+                  "Amazon Bedrock (Nova Lite) for real-time LLM reasoning with Mistral failover",
                   "Autonomous remediation for low-risk events, human approval for high-impact decisions",
                   "Complete audit trail — every decision fingerprinted and traceable",
                 ].map((point, i) => (
@@ -327,7 +327,7 @@ export default function OverviewPage() {
                 <h3 className="text-xl font-black tracking-tight">System at a Glance</h3>
                 {[
                   { label: "Architecture", value: "7-agent stateful pipeline (LangGraph.js DAG)" },
-                  { label: "Inference Engine", value: "Amazon Bedrock — Nova Pro → Mistral Large" },
+                  { label: "Inference Engine", value: "Amazon Bedrock — Nova Lite → Mistral Large" },
                   { label: "Data Backplane", value: "DynamoDB (Stream, Audit, Approvals tables)" },
                   { label: "Decision Model", value: "P1/P2/P3 severity × financial impact ranking" },
                   { label: "Automation", value: "P3 → autonomous exec · P1/P2 → HITL approval" },
