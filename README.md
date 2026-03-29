@@ -96,7 +96,7 @@ Ships with 6 named enterprise scenarios (`normal`, `vendor_spike`, `sla_crisis`,
 > ![Simulation Lab](docs/screenshots/simulation.png)
 
 ### 3. Amazon Bedrock Reasoning (Nova Lite + Mistral Fallback)
-The Decision Agent uses `amazon.nova-pro-v1:0` via the Bedrock Converse API to synthesize ML findings into a structured JSON action plan. If Nova Lite fails (timeout, rate limit), the pipeline automatically falls back to `mistral.mistral-large-2402-v1:0` using the `[INST]` prompt format. **The pipeline never halts.**
+The Decision Agent uses `amazon.nova-lite-v1:0` via the Bedrock Converse API to synthesize ML findings into a structured JSON action plan. If Nova Lite fails (timeout, rate limit), the pipeline automatically falls back to `mistral.mistral-large-2402-v1:0` using the `[INST]` prompt format. **The pipeline never halts.**
 
 ### 4. Statistical Anomaly Detection
 Uses statistical methods inspired by Isolation Forest principles. Detects three types of anomalies: `spike`, `off-contract`, and `duplicate_timing`. Each anomaly receives a dynamic severity score and an estimated INR leakage value.
