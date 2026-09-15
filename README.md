@@ -1,5 +1,3 @@
----
-
 <div align="center">
   <h1>⚡ Cost Intel Intelligence</h1>
   <p><b>Enterprise Cost Intelligence & Autonomous Action</b></p>
